@@ -6,3 +6,5 @@ CREATE TABLE IF NOT EXISTS hotel.admin(
   password varchar(255),
   PRIMARY KEY (id)
 );
+
+INSERT INTO hotel.admin(user, password) VALUES(admin, 123)
