@@ -1,0 +1,8 @@
+CREATE DATABASE hotel;
+
+CREATE TABLE IF NOT EXISTS hotel.admin(
+  id int NOT NULL AUTO_INCREMENT,
+  user varchar(255),
+  password varchar(255),
+  PRIMARY KEY (id)
+);
