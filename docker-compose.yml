@@ -8,8 +8,5 @@ services:
       - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: "root"
-      MYSQL_USER: hotelAdmin
-      MYSQL_PASSWORD: adminHotel
-      MYSQL_ROOT_HOST: 'localhost'
     volumes:
       - "./etc/scripts/mysql/init.db:/docker-entrypoint-initdb.d/1.sql"

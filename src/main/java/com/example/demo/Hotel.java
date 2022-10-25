@@ -1,30 +1,24 @@
 package com.example.demo;
 
-import javafx.application.Platform;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.text.Text;
-import javafx.stage.Popup;
 import javafx.stage.Stage;
-
-import javax.swing.plaf.nimbus.State;
+import javafx.util.Callback;
+import javafx.scene.control.TableColumn.CellDataFeatures;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.ResultSet;
-
-import static java.lang.String.valueOf;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 
 public class Hotel extends Application {
 
@@ -216,34 +210,43 @@ public class Hotel extends Application {
     }
 
     public TableView tablaRecepcionistas(Stage stage, Statement s, Scene validarRec) throws SQLException, IOException {
-        TableView tabla = (TableView) validarRec.lookup("#tabla");
-        TableColumn userCol = new TableColumn<>("Usuario");
-        TableColumn passwordCol = new TableColumn("Password");
-        TableColumn nomCol = new TableColumn("Nom");
-        TableColumn cognomsCol = new TableColumn("Cognoms");
-        TableColumn dniCol = new TableColumn("DNI");
-        TableColumn nacCol = new TableColumn("Nacionalitat");
-        TableColumn tlfCol = new TableColumn("Teléfon");
-        TableColumn emailCol = new TableColumn("Email");
-        tabla.setEditable(true);
+        TableView tableview = (TableView) validarRec.lookup("#tabla");
+        ObservableList<Object> data = FXCollections.observableArrayList();
         ResultSet rs = s.executeQuery("SELECT * FROM recepcionistas WHERE Validado = '0'");
-        while (rs.next()) {
-            userCol.setCellValueFactory(new PropertyValueFactory<>(rs.getString("User")));
-            passwordCol.setCellValueFactory(new PropertyValueFactory(rs.getString("Password")));
-            nomCol.setCellValueFactory(new PropertyValueFactory(rs.getString("Nom")));
-            cognomsCol.setCellValueFactory(new PropertyValueFactory(rs.getString("Cognoms")));
-            dniCol.setCellValueFactory(new PropertyValueFactory(rs.getString("DNI")));
-            nacCol.setCellValueFactory(new PropertyValueFactory(rs.getString("Nacionalitat")));
-            tlfCol.setCellValueFactory(new PropertyValueFactory(rs.getString("Teléfon")));
-            emailCol.setCellValueFactory(new PropertyValueFactory(rs.getString("Email")));
-            System.out.println(rs.getString("User"));
-            tabla.getColumns().add(userCol);
-            tabla.getItems().add(
-                    new Recepcionista("Pepito", "", "", "",
-                            "", "", 0, ""));
-        }
+        try {
+            for(int i=0 ; i<rs.getMetaData().getColumnCount(); i++){
+                //We are using non property style for making dynamic table
+                final int j = i;
+                TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i+1));
+                col.setCellValueFactory(new Callback<CellDataFeatures<ObservableList,String>,ObservableValue<String>>(){
+                    public ObservableValue<String> call(CellDataFeatures<ObservableList, String> param) {
+                        return new SimpleStringProperty(param.getValue().get(j).toString());
+                    }
+                });
 
-        return tabla;
+                tableview.getColumns().addAll(col);
+                System.out.println("Column ["+i+"] ");
+            }
+
+            while (rs.next()) {
+                //Iterate Row
+                ObservableList<String> row = FXCollections.observableArrayList();
+                for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
+                    //Iterate Column
+                    row.add(rs.getString(i));
+                }
+                System.out.println("Row [1] added " + row);
+                data.add(row);
+
+            }
+
+            //FINALLY ADDED TO TableView
+            tableview.setItems(data);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error on Building Data");
+        }
+        return tableview;
     }
 
 }

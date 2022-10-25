@@ -7,4 +7,20 @@ CREATE TABLE IF NOT EXISTS hotel.admin(
   PRIMARY KEY (id)
 );
 
-INSERT INTO hotel.admin(user, password) VALUES(admin, 123)
+CREATE TABLE IF NOT EXISTS hotel.recepcionistas(
+  User varchar(255),
+  Password varchar(255),
+  Nom varchar(255),
+  Cognoms varchar(255),
+  DNI varchar(255),
+  Nacionalitat varchar(255),
+  Teléfon varchar(255),
+  Email varchar(255),
+  Validado varchar(255),
+  PRIMARY KEY (User)
+);
+
+INSERT INTO hotel.admin(user, password) VALUES("admin", "123");
+
+INSERT INTO hotel.recepcionistas(User, Password, Nom, Cognoms, DNI, Nacionalitat, Teléfon, Email, Validado)
+VALUES("recep1", "1234", "pepe", "tomas", "3453212", "spain", 66654531, "test@test.com", "0");

@@ -12,7 +12,7 @@ public class Recepcionista {
 
 
     public String getUsuario() {
-        return usuario;
+        return this.usuario;
     }
 
     public void setUsuario(String usuario) {
