@@ -1,5 +1,8 @@
 package com.example.demo;
 
+import com.example.demo.domain.Recepcionista;
+import com.example.demo.infrastructure.DatabaseConnection;
+import com.example.demo.infrastructure.MySQLRepository;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -12,50 +15,52 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.scene.control.TableColumn.CellDataFeatures;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
 public class Hotel extends Application {
+    private MySQLRepository mySQLRepository;
 
-
-    public static void main(String[] args) throws SQLException {
-
+    public static void main(String[] args) {
         launch();
-
     }
 
     @Override
     public void start(Stage stage) throws SQLException, IOException {
-        Connection conexion = Conexion.conectar();
-        Statement s = conexion.createStatement();
+        Connection connection = DatabaseConnection.connect();
+        Statement s = connection.createStatement();
+        this.mySQLRepository = new MySQLRepository(s);
 
         stage.setTitle("Iniciar sesión");
-        Scene iniciarsesion = iniciarSesion(stage, s);
+        Scene iniciarsesion = iniciarSesion(stage);
 
         stage.setScene(iniciarsesion);
         stage.show();
     }
 
 
-    public int Validar(String usuario, String password, Statement s) throws SQLException {
+    public boolean Validar(String usuario, String password) throws SQLException {
+        ResultSet rs = this.mySQLRepository.GetAdminCredentials(usuario, password);
         int rows = 0;
-        ResultSet rs = s.executeQuery("SELECT * FROM admin WHERE user = '" + usuario + "' AND password = '" + password + "'");
         while (rs.next()) {
             rows++;
         }
+
         if (rows == 1) {
-            return 1;
-        } else {
-            return 0;
+            return true;
         }
+
+        return false;
     }
 
-    public Scene iniciarSesion(Stage stage, Statement s) throws IOException {
+    public Scene iniciarSesion(Stage stage) throws IOException {
 
         FXMLLoader fxmlLoader2 = new FXMLLoader(Hotel.class.getResource("Error.fxml"));
         Scene error = new Scene(fxmlLoader2.load());
@@ -72,20 +77,7 @@ public class Hotel extends Application {
             String usuario = ((TextField) iniciarsesion.lookup("#usuario")).getText();
             String password = ((PasswordField) iniciarsesion.lookup("#password")).getText();
             try {
-                if (Validar(usuario, password, s) == 1) {
-
-                    Scene inicio = panelAdministrador(stage, s, validarRecepcionista(stage, s));
-                    stage.setScene(inicio);
-                    stage.centerOnScreen();
-                } else {
-                    stage.setScene(error);
-                    Label err = (Label) error.lookup("#error");
-                    err.setText("Las credenciales son incorrectas");
-                    Button volver = (Button) error.lookup("#volver");
-                    volver.setOnAction(event2 -> {
-                        stage.setScene(iniciarsesion);
-                    });
-                }
+                validateCredentials(stage, error, iniciarsesion, usuario, password);
             } catch (SQLException | IOException ex) {
                 System.out.println("No se pudo ejecutar la consulta: ");
                 ex.printStackTrace();
@@ -93,9 +85,9 @@ public class Hotel extends Application {
         });
 
         registrar.setOnAction(event -> {
-            Scene registro = null;
+            Scene registro;
             try {
-                registro = pantallaRegistro(stage, s);
+                registro = pantallaRegistro(stage);
                 stage.setTitle("Registrar recepcionista");
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -111,7 +103,21 @@ public class Hotel extends Application {
         return iniciarsesion;
     }
 
-    public Scene pantallaRegistro(Stage stage, Statement s) throws IOException {
+    private void validateCredentials(Stage stage, Scene error, Scene iniciarsesion, String usuario, String password) throws SQLException, IOException {
+        if (Validar(usuario, password)) {
+            Scene inicio = panelAdministrador(stage, validarRecepcionista());
+            stage.setScene(inicio);
+            stage.centerOnScreen();
+        } else {
+            stage.setScene(error);
+            Label err = (Label) error.lookup("#error");
+            err.setText("Las credenciales son incorrectas");
+            Button volver = (Button) error.lookup("#volver");
+            volver.setOnAction(event2 -> stage.setScene(iniciarsesion));
+        }
+    }
+
+    public Scene pantallaRegistro(Stage stage) throws IOException {
         FXMLLoader fxmlLoader2 = new FXMLLoader(Hotel.class.getResource("Error.fxml"));
         Scene error = new Scene(fxmlLoader2.load());
 
@@ -127,7 +133,6 @@ public class Hotel extends Application {
 
         registerBtn.setOnAction(event -> {
             try {
-
                 String usuario = ((TextField) registro.lookup("#usuario")).getText();
                 String password = ((PasswordField) registro.lookup("#password")).getText();
                 String nom = ((TextField) registro.lookup("#nom")).getText();
@@ -139,18 +144,18 @@ public class Hotel extends Application {
                     Integer tlf = Integer.parseInt(telefon);
                     String email = ((TextField) registro.lookup("#email")).getText();
                     Recepcionista r1 = new Recepcionista(usuario, password, nom, cognoms, DNI, nacionalitat, tlf, email);
-                    int rows = s.executeUpdate("INSERT INTO recepcionistas VALUES ('" + r1.getUsuario() + "','" + r1.getPassword() + "','" + r1.getNom() + "','" + r1.getCognoms() + "','" + r1.getDNI() + "','" + r1.getNacionalitat() + "','" + r1.getTelefon() + "','" + r1.getEmail() + "','0')");
+                    int rows = this.mySQLRepository.UpdateRecepcionist(r1.getUsuario(), r1.getPassword(), r1.getNom(),
+                            r1.getCognoms(), r1.getDNI(), r1.getNacionalitat(), r1.getTelefon(), r1.getEmail());
                     stage.setScene(confirmar);
                     Button finalizar = (Button) confirmar.lookup("#finalizar");
                     finalizar.setOnAction(event2 -> {
                         try {
-                            stage.setScene(iniciarSesion(stage, s));
+                            stage.setScene(iniciarSesion(stage));
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
                     });
                 } catch (NumberFormatException e) {
-
                     stage.setScene(error);
                     Label err = (Label) error.lookup("#error");
                     err.setText("El campo teléfono solo puede contener números");
@@ -166,7 +171,7 @@ public class Hotel extends Application {
 
         ReturnBtn.setOnAction(event -> {
             try {
-                stage.setScene(iniciarSesion(stage, s));
+                stage.setScene(iniciarSesion(stage));
                 stage.setTitle("Iniciar sesión");
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -176,7 +181,7 @@ public class Hotel extends Application {
         return registro;
     }
 
-    public Scene panelAdministrador(Stage stage, Statement s, Scene validarRec) throws IOException, SQLException {
+    public Scene panelAdministrador(Stage stage, Scene validarRec) throws IOException, SQLException {
         FXMLLoader fxmlLoader = new FXMLLoader(Hotel.class.getResource("PanelAdmin.fxml"));
         Scene inicio = new Scene(fxmlLoader.load());
 
@@ -184,13 +189,13 @@ public class Hotel extends Application {
         validacion.setOnAction(event -> {
             stage.setScene(validarRec);
             try {
-                tablaRecepcionistas(stage, s, validarRec);
+                tablaRecepcionistas(validarRec);
             } catch (SQLException | IOException e) {
                 throw new RuntimeException(e);
             }
         });
         int rows = 0;
-        ResultSet rs = s.executeQuery("SELECT * FROM recepcionistas WHERE Validado = '0'");
+        ResultSet rs = this.mySQLRepository.GetValidatedReceptionist();
         while (rs.next()) {
             rows++;
         }
@@ -201,52 +206,41 @@ public class Hotel extends Application {
 
     }
 
-    public Scene validarRecepcionista(Stage stage, Statement s) throws IOException, SQLException {
+    public Scene validarRecepcionista() throws IOException {
         FXMLLoader fxmlLoad = new FXMLLoader(Hotel.class.getResource("Validar.fxml"));
         Scene validarRecepcionista = new Scene(fxmlLoad.load());
-
 
         return validarRecepcionista;
     }
 
-    public TableView tablaRecepcionistas(Stage stage, Statement s, Scene validarRec) throws SQLException, IOException {
+    public TableView tablaRecepcionistas(Scene validarRec) throws SQLException, IOException {
         TableView tableview = (TableView) validarRec.lookup("#tabla");
         ObservableList<Object> data = FXCollections.observableArrayList();
-        ResultSet rs = s.executeQuery("SELECT * FROM recepcionistas WHERE Validado = '0'");
+        ResultSet rs = this.mySQLRepository.GetValidatedReceptionist();
         try {
-            for(int i=0 ; i<rs.getMetaData().getColumnCount(); i++){
-                //We are using non property style for making dynamic table
+            for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
                 final int j = i;
-                TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i+1));
-                col.setCellValueFactory(new Callback<CellDataFeatures<ObservableList,String>,ObservableValue<String>>(){
-                    public ObservableValue<String> call(CellDataFeatures<ObservableList, String> param) {
-                        return new SimpleStringProperty(param.getValue().get(j).toString());
-                    }
-                });
-
+                TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i + 1));
+                col.setCellValueFactory((Callback<CellDataFeatures<ObservableList, String>, ObservableValue<String>>) param -> new SimpleStringProperty(param.getValue().get(j).toString()));
                 tableview.getColumns().addAll(col);
-                System.out.println("Column ["+i+"] ");
+                System.out.println("Column [" + i + "] ");
             }
 
             while (rs.next()) {
-                //Iterate Row
                 ObservableList<String> row = FXCollections.observableArrayList();
                 for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
-                    //Iterate Column
                     row.add(rs.getString(i));
                 }
                 System.out.println("Row [1] added " + row);
                 data.add(row);
 
             }
-
-            //FINALLY ADDED TO TableView
             tableview.setItems(data);
+
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Error on Building Data");
         }
         return tableview;
     }
-
 }

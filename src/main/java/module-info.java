@@ -8,4 +8,8 @@ module com.example.demo {
 
     opens com.example.demo to javafx.fxml;
     exports com.example.demo;
+    exports com.example.demo.domain;
+    opens com.example.demo.domain to javafx.fxml;
+    exports com.example.demo.infrastructure;
+    opens com.example.demo.infrastructure to javafx.fxml;
 }
