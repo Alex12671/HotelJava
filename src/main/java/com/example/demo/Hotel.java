@@ -1,17 +1,19 @@
 package com.example.demo;
 
+import com.dlsc.formsfx.view.controls.SimpleRadioButtonControl;
 import com.example.demo.domain.Recepcionista;
 import com.example.demo.infrastructure.DatabaseConnection;
 import com.example.demo.infrastructure.MySQLRepository;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
@@ -38,7 +40,8 @@ public class Hotel extends Application {
     @Override
     public void start(Stage stage) throws SQLException, IOException {
         Connection connection = DatabaseConnection.connect();
-        Statement s = connection.createStatement();
+        Statement s = connection.createStatement( ResultSet.TYPE_SCROLL_INSENSITIVE,
+                ResultSet.CONCUR_UPDATABLE);
         this.mySQLRepository = new MySQLRepository(s);
 
         stage.setTitle("Iniciar sesión");
@@ -189,10 +192,11 @@ public class Hotel extends Application {
         Scene inicio = new Scene(fxmlLoader.load());
 
         Button validacion = (Button) inicio.lookup("#validar");
+
         validacion.setOnAction(event -> {
             stage.setScene(validarRec);
             try {
-                tablaRecepcionistas(validarRec);
+                tablaRecepcionistas(stage,validarRec);
             } catch (SQLException | IOException e) {
                 throw new RuntimeException(e);
             }
@@ -203,7 +207,12 @@ public class Hotel extends Application {
             rows++;
         }
         if (rows != 0) {
-            validacion.setStyle("-fx-background-color: lightcoral");
+            final String IDLE_BUTTON_STYLE = "-fx-background-color: lightcoral";
+            final String HOVERED_BUTTON_STYLE = "-fx-background-color: #DF2929;";
+
+            validacion.setStyle(IDLE_BUTTON_STYLE);
+            validacion.setOnMouseEntered(e -> validacion.setStyle(HOVERED_BUTTON_STYLE));
+            validacion.setOnMouseExited(e -> validacion.setStyle(IDLE_BUTTON_STYLE));
         }
         return inicio;
 
@@ -216,27 +225,39 @@ public class Hotel extends Application {
         return validarRecepcionista;
     }
 
-    public TableView tablaRecepcionistas(Scene validarRec) throws SQLException, IOException {
+    public TableView tablaRecepcionistas(Stage stage, Scene validarRec) throws SQLException, IOException {
         TableView tableview = (TableView) validarRec.lookup("#tabla");
         ObservableList<Object> data = FXCollections.observableArrayList();
         ResultSet rs = this.mySQLRepository.GetValidatedReceptionist();
         try {
+            var wrapper = new Object(){int rows = 0; };
             for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
                 final int j = i;
-                TableColumn colBtn = new TableColumn(rs.getMetaData().getColumnName(i + 1));
-                if(rs.getMetaData().getColumnCount() - 1 == i) {
-                    Callback<TableColumn<XYChart.Data, Void>, TableCell<XYChart.Data, Void>> cellFactory = new Callback<TableColumn<XYChart.Data, Void>, TableCell<XYChart.Data, Void>>() {
+                if (rs.getMetaData().getColumnName(i + 1).equals("Validado")) {
+                    TableColumn colBtn = new TableColumn("Validar");
+                    colBtn.setStyle( "-fx-alignment: CENTER;");
+                    Callback<TableColumn<Integer, Void>, TableCell<Integer, Void>> cellFactory = new Callback<TableColumn<Integer, Void>, TableCell<Integer, Void>>() {
                         @Override
-                        public TableCell<XYChart.Data, Void> call(final TableColumn<XYChart.Data, Void> param) {
-                            final TableCell<XYChart.Data, Void> cell = new TableCell<XYChart.Data, Void>() {
+                        public TableCell<Integer, Void> call(final TableColumn<Integer, Void> param) {
+                            final TableCell<Integer, Void> cell = new TableCell<Integer, Void>() {
 
-                                private final Button btn = new Button("Action");
+                                private final Button btn = new Button("Validar");
 
                                 {
                                     btn.setOnAction((ActionEvent event) -> {
-                                        XYChart.Data data = getTableView().getItems().get(getIndex());
-                                        System.out.println("selectedData: " + data);
+                                        try {
+                                            int pos = wrapper.rows;
+                                            TableColumn col = (TableColumn) tableview.getColumns().get(0);
+
+                                            // this gives the value in the selected cell:
+                                            String id = (String) col.getCellObservableValue(tableview.getItems().get(pos)).getValue();
+                                            System.out.println(id);
+
+                                        } catch (Exception e) {
+                                            throw new RuntimeException(e);
+                                        }
                                     });
+                                    wrapper.rows++;
                                 }
 
                                 @Override
@@ -256,32 +277,45 @@ public class Hotel extends Application {
                     colBtn.setCellFactory(cellFactory);
 
                     tableview.getColumns().add(colBtn);
+
                 }
                 else {
-                    colBtn.setCellValueFactory((Callback<CellDataFeatures<ObservableList, String>, ObservableValue<String>>) param -> new SimpleStringProperty(param.getValue().get(j).toString()));
-                    tableview.getColumns().addAll(colBtn);
-                    System.out.println("Column [" + i + "] ");
-                }
+                    TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i + 1));
+                    col.setStyle( "-fx-alignment: CENTER;");
+                    col.setCellValueFactory((Callback<CellDataFeatures<ObservableList, String>, ObservableValue<String>>) param -> new SimpleStringProperty(param.getValue().get(j).toString()));
+                    tableview.getColumns().addAll(col);
 
+                }
 
             }
 
             while (rs.next()) {
+
                 ObservableList<String> row = FXCollections.observableArrayList();
                 for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
                     row.add(rs.getString(i));
                 }
-                System.out.println("Row [1] added " + row);
                 data.add(row);
 
             }
             tableview.setItems(data);
 
+            Button returnBtn = (Button) validarRec.lookup("#returnToLogin");
+            returnBtn.setOnAction((ActionEvent event) -> {
+                try {
+                    tableview.getItems().clear();
+                    tableview.getColumns().clear();
+                    stage.setScene(panelAdministrador(stage,validarRec));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Error on Building Data");
         }
         return tableview;
     }
-
 }

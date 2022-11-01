@@ -20,7 +20,7 @@ public class MySQLRepository {
     }
 
     public int UpdateRecepcionist(String usuario, String password, String nom, String cognoms, String dni, String nacionalitat, Integer telefon, String email) throws SQLException {
-        return this.statement.executeUpdate("INSERT INTO recepcionistas VALUES ('" + usuario + "','" + password +
+        return this.statement.executeUpdate("INSERT INTO recepcionistas VALUES (DEFAULT,'" + usuario + "','" + password +
                 "','" + nom + "','" + cognoms + "','" + dni + "','" + nacionalitat + "','" + telefon + "','" + email + "','0')");
     }
 }
