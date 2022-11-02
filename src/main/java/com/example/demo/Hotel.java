@@ -230,7 +230,7 @@ public class Hotel extends Application {
         ObservableList<Object> data = FXCollections.observableArrayList();
         ResultSet rs = this.mySQLRepository.GetValidatedReceptionist();
         try {
-            var wrapper = new Object(){int rows = 0; };
+            var wrapper = new Object(){int rows = -1; };
             for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
                 final int j = i;
                 if (rs.getMetaData().getColumnName(i + 1).equals("Validado")) {
@@ -242,14 +242,13 @@ public class Hotel extends Application {
                             final TableCell<Integer, Void> cell = new TableCell<Integer, Void>() {
 
                                 private final Button btn = new Button("Validar");
-
+                                    final int pos = wrapper.rows;
                                 {
                                     btn.setOnAction((ActionEvent event) -> {
                                         try {
-                                            int pos = wrapper.rows;
+
                                             TableColumn col = (TableColumn) tableview.getColumns().get(0);
 
-                                            // this gives the value in the selected cell:
                                             String id = (String) col.getCellObservableValue(tableview.getItems().get(pos)).getValue();
                                             System.out.println(id);
 
@@ -257,7 +256,7 @@ public class Hotel extends Application {
                                             throw new RuntimeException(e);
                                         }
                                     });
-                                    wrapper.rows++;
+
                                 }
 
                                 @Override
@@ -290,7 +289,7 @@ public class Hotel extends Application {
             }
 
             while (rs.next()) {
-
+                wrapper.rows++;
                 ObservableList<String> row = FXCollections.observableArrayList();
                 for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
                     row.add(rs.getString(i));
