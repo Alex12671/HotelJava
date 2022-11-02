@@ -45,7 +45,7 @@ public class Hotel extends Application {
         this.mySQLRepository = new MySQLRepository(s);
 
         stage.setTitle("Iniciar sesión");
-        Scene iniciarsesion = iniciarSesion(stage);
+        Scene iniciarsesion = LoginPage(stage);
 
         stage.setScene(iniciarsesion);
         stage.show();
@@ -66,24 +66,65 @@ public class Hotel extends Application {
         return false;
     }
 
-    public Scene iniciarSesion(Stage stage) throws IOException {
+    public Scene AdminLogin(Stage stage) throws IOException {
 
         FXMLLoader fxmlLoader2 = new FXMLLoader(Hotel.class.getResource("Error.fxml"));
         Scene error = new Scene(fxmlLoader2.load());
 
         FXMLLoader fxmlLoader = new FXMLLoader(Hotel.class.getResource("Login.fxml"));
-        Scene iniciarsesion = new Scene(fxmlLoader.load());
+        Scene AdminLogin = new Scene(fxmlLoader.load());
 
-        Button Loginbtn = (Button) iniciarsesion.lookup("#loginbtn");
-        Button registrar = (Button) iniciarsesion.lookup("#registrarbtn");
-        Button exit = (Button) iniciarsesion.lookup("#exitbtn");
-        PasswordField pwBox = (PasswordField) iniciarsesion.lookup("#password");
+        Button Loginbtn = (Button) AdminLogin.lookup("#loginbtn");
+        Button regresar = (Button) AdminLogin.lookup("#regresar");
+        Button exit = (Button) AdminLogin.lookup("#exitbtn");
 
         Loginbtn.setOnAction(event -> {
-            String usuario = ((TextField) iniciarsesion.lookup("#usuario")).getText();
-            String password = ((PasswordField) iniciarsesion.lookup("#password")).getText();
+            String usuario = ((TextField) AdminLogin.lookup("#usuario")).getText();
+            String password = ((PasswordField) AdminLogin.lookup("#password")).getText();
             try {
-                validateCredentials(stage, error, iniciarsesion, usuario, password);
+                validateCredentials(stage, error, AdminLogin, usuario, password);
+            } catch (SQLException | IOException ex) {
+                System.out.println("No se pudo ejecutar la consulta: ");
+                ex.printStackTrace();
+            }
+        });
+
+        regresar.setOnAction(event -> {
+            Scene LoginPrincipal;
+            try {
+                LoginPrincipal = LoginPage(stage);
+                stage.setTitle("Iniciar Sesión");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            stage.setScene(LoginPrincipal);
+            stage.centerOnScreen();
+        });
+
+        exit.setOnAction(event -> {
+            Platform.exit();
+        });
+
+        return AdminLogin;
+    }
+    public Scene LoginPage(Stage stage) throws IOException {
+
+        FXMLLoader fxmlLoader2 = new FXMLLoader(Hotel.class.getResource("Error.fxml"));
+        Scene error = new Scene(fxmlLoader2.load());
+
+        FXMLLoader fxmlLoader = new FXMLLoader(Hotel.class.getResource("LoginPage.fxml"));
+        Scene LoginPage = new Scene(fxmlLoader.load());
+
+        Button Loginbtn = (Button) LoginPage.lookup("#loginbtn");
+        Button registrar = (Button) LoginPage.lookup("#registrarbtn");
+        Button exit = (Button) LoginPage.lookup("#exitbtn");
+        PasswordField pwBox = (PasswordField) LoginPage.lookup("#password");
+
+        Loginbtn.setOnAction(event -> {
+            String usuario = ((TextField) LoginPage.lookup("#usuario")).getText();
+            String password = ((PasswordField) LoginPage.lookup("#password")).getText();
+            try {
+                validateCredentials(stage, error, LoginPage, usuario, password);
             } catch (SQLException | IOException ex) {
                 System.out.println("No se pudo ejecutar la consulta: ");
                 ex.printStackTrace();
@@ -106,7 +147,7 @@ public class Hotel extends Application {
             Platform.exit();
         });
 
-        return iniciarsesion;
+        return LoginPage;
     }
 
     private void validateCredentials(Stage stage, Scene error, Scene iniciarsesion, String usuario, String password) throws SQLException, IOException {
@@ -156,7 +197,7 @@ public class Hotel extends Application {
                     Button finalizar = (Button) confirmar.lookup("#finalizar");
                     finalizar.setOnAction(event2 -> {
                         try {
-                            stage.setScene(iniciarSesion(stage));
+                            stage.setScene(LoginPage(stage));
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
@@ -177,7 +218,7 @@ public class Hotel extends Application {
 
         ReturnBtn.setOnAction(event -> {
             try {
-                stage.setScene(iniciarSesion(stage));
+                stage.setScene(LoginPage(stage));
                 stage.setTitle("Iniciar sesión");
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -231,60 +272,15 @@ public class Hotel extends Application {
         ResultSet rs = this.mySQLRepository.GetValidatedReceptionist();
         try {
             var wrapper = new Object(){int rows = -1; };
-            for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
+            for (int i = 0; i < rs.getMetaData().getColumnCount() - 1; i++) {
                 final int j = i;
-                if (rs.getMetaData().getColumnName(i + 1).equals("Validado")) {
-                    TableColumn colBtn = new TableColumn("Validar");
-                    colBtn.setStyle( "-fx-alignment: CENTER;");
-                    Callback<TableColumn<Integer, Void>, TableCell<Integer, Void>> cellFactory = new Callback<TableColumn<Integer, Void>, TableCell<Integer, Void>>() {
-                        @Override
-                        public TableCell<Integer, Void> call(final TableColumn<Integer, Void> param) {
-                            final TableCell<Integer, Void> cell = new TableCell<Integer, Void>() {
 
-                                private final Button btn = new Button("Validar");
-                                    final int pos = wrapper.rows;
-                                {
-                                    btn.setOnAction((ActionEvent event) -> {
-                                        try {
+                TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i + 1));
+                col.setStyle( "-fx-alignment: CENTER;");
+                col.setCellValueFactory((Callback<CellDataFeatures<ObservableList, String>, ObservableValue<String>>) param -> new SimpleStringProperty(param.getValue().get(j).toString()));
+                tableview.getColumns().addAll(col);
 
-                                            TableColumn col = (TableColumn) tableview.getColumns().get(0);
 
-                                            String id = (String) col.getCellObservableValue(tableview.getItems().get(pos)).getValue();
-                                            System.out.println(id);
-
-                                        } catch (Exception e) {
-                                            throw new RuntimeException(e);
-                                        }
-                                    });
-
-                                }
-
-                                @Override
-                                public void updateItem(Void item, boolean empty) {
-                                    super.updateItem(item, empty);
-                                    if (empty) {
-                                        setGraphic(null);
-                                    } else {
-                                        setGraphic(btn);
-                                    }
-                                }
-                            };
-                            return cell;
-                        }
-                    };
-
-                    colBtn.setCellFactory(cellFactory);
-
-                    tableview.getColumns().add(colBtn);
-
-                }
-                else {
-                    TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i + 1));
-                    col.setStyle( "-fx-alignment: CENTER;");
-                    col.setCellValueFactory((Callback<CellDataFeatures<ObservableList, String>, ObservableValue<String>>) param -> new SimpleStringProperty(param.getValue().get(j).toString()));
-                    tableview.getColumns().addAll(col);
-
-                }
 
             }
 
@@ -310,6 +306,39 @@ public class Hotel extends Application {
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
+            });
+
+            Button validar = (Button) validarRec.lookup("#validar");
+            validar.setOnAction((ActionEvent event) -> {
+                TablePosition pos = (TablePosition) tableview.getSelectionModel().getSelectedCells().get(0);
+                int row = pos.getRow();
+                TableColumn col = (TableColumn) tableview.getColumns().get(0);
+                String id = (String) col.getCellObservableValue(tableview.getItems().get(row)).getValue();
+                try {
+                    if(this.mySQLRepository.ValidateRecepcionist(Integer.parseInt(id)) == 1) {
+                        tableview.getItems().removeAll(
+                                tableview.getSelectionModel().getSelectedItems());
+                    }
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+            Button rechazar = (Button) validarRec.lookup("#rechazar");
+            rechazar.setOnAction((ActionEvent event) -> {
+                TablePosition pos = (TablePosition) tableview.getSelectionModel().getSelectedCells().get(0);
+                int row = pos.getRow();
+                TableColumn col = (TableColumn) tableview.getColumns().get(0);
+                String id = (String) col.getCellObservableValue(tableview.getItems().get(row)).getValue();
+                try {
+                    if(this.mySQLRepository.RejectReceptionist(Integer.parseInt(id)) == 1) {
+                        tableview.getItems().removeAll(
+                                tableview.getSelectionModel().getSelectedItems());
+                    }
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+
             });
         } catch (Exception e) {
             e.printStackTrace();

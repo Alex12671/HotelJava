@@ -23,4 +23,13 @@ public class MySQLRepository {
         return this.statement.executeUpdate("INSERT INTO recepcionistas VALUES (DEFAULT,'" + usuario + "','" + password +
                 "','" + nom + "','" + cognoms + "','" + dni + "','" + nacionalitat + "','" + telefon + "','" + email + "','0')");
     }
+
+    public int ValidateRecepcionist(int id) throws SQLException {
+        return this.statement.executeUpdate("UPDATE recepcionistas SET Validado = 1 WHERE Id = '" + id + "'");
+    }
+
+    public int RejectReceptionist(int id) throws SQLException {
+
+        return this.statement.executeUpdate("DELETE FROM recepcionistas WHERE Id = '" + id + "'");
+    }
 }

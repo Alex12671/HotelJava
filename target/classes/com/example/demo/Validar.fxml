@@ -14,6 +14,7 @@
     <RowConstraints maxHeight="-Infinity" minHeight="100.0" prefHeight="100.0" vgrow="SOMETIMES" />
     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="0.0" prefHeight="0.0" vgrow="SOMETIMES" />
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
@@ -33,13 +34,23 @@
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
          </columnResizePolicy>
       </TableView>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
          <children>
             <Button fx:id="returnToLogin" mnemonicParsing="false" text="Volver a panel de administración">
                <font>
                   <Font size="22.0" />
                </font>
             </Button>
+         </children>
+      </HBox>
+      <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="3">
+         <children>
+            <Button fx:id="validar" mnemonicParsing="false" text="Validar recepcionista seleccionado" />
+         </children>
+      </HBox>
+      <HBox alignment="TOP_CENTER" layoutX="10.0" layoutY="560.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+         <children>
+            <Button fx:id="rechazar" mnemonicParsing="false" text="Eliminar recepcionista seleccionado" />
          </children>
       </HBox>
    </children>
