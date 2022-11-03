@@ -75,7 +75,7 @@
                      </image></ImageView>
                </graphic>
             </Button>
-            <Button fx:id="registrarbtn" mnemonicParsing="false" text="Registrarse">
+            <Button fx:id="regresar" mnemonicParsing="false" text="Volver a login">
                <font>
                   <Font size="17.0" />
                </font>

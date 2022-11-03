@@ -52,19 +52,6 @@ public class Hotel extends Application {
     }
 
 
-    public boolean Validar(String usuario, String password) throws SQLException {
-        ResultSet rs = this.mySQLRepository.GetAdminCredentials(usuario, password);
-        int rows = 0;
-        while (rs.next()) {
-            rows++;
-        }
-
-        if (rows == 1) {
-            return true;
-        }
-
-        return false;
-    }
 
     public Scene AdminLogin(Stage stage) throws IOException {
 
@@ -82,7 +69,18 @@ public class Hotel extends Application {
             String usuario = ((TextField) AdminLogin.lookup("#usuario")).getText();
             String password = ((PasswordField) AdminLogin.lookup("#password")).getText();
             try {
-                validateCredentials(stage, error, AdminLogin, usuario, password);
+                if(this.mySQLRepository.GetAdminCredentials(usuario,password) == 1) {
+                    Scene inicio = panelAdministrador(stage, validarRecepcionista());
+                    stage.setScene(inicio);
+                    stage.centerOnScreen();
+                }
+                else {
+                    stage.setScene(error);
+                    Label err = (Label) error.lookup("#error");
+                    err.setText("Las credenciales son incorrectas");
+                    Button volver = (Button) error.lookup("#volver");
+                    volver.setOnAction(event2 -> stage.setScene(AdminLogin));
+                }
             } catch (SQLException | IOException ex) {
                 System.out.println("No se pudo ejecutar la consulta: ");
                 ex.printStackTrace();
@@ -118,13 +116,35 @@ public class Hotel extends Application {
         Button Loginbtn = (Button) LoginPage.lookup("#loginbtn");
         Button registrar = (Button) LoginPage.lookup("#registrarbtn");
         Button exit = (Button) LoginPage.lookup("#exitbtn");
-        PasswordField pwBox = (PasswordField) LoginPage.lookup("#password");
+        Button logAdmin = (Button) LoginPage.lookup("#loginAdmin");
+
+        logAdmin.setOnAction(event -> {
+            try {
+                Scene loginAdmin = AdminLogin(stage);
+                stage.setTitle("Inicio sesión admin");
+                stage.setScene(loginAdmin);
+                stage.centerOnScreen();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         Loginbtn.setOnAction(event -> {
             String usuario = ((TextField) LoginPage.lookup("#usuario")).getText();
             String password = ((PasswordField) LoginPage.lookup("#password")).getText();
             try {
-                validateCredentials(stage, error, LoginPage, usuario, password);
+                if(this.mySQLRepository.GetReceptionistCredentials(usuario,password) == 1) {
+                    Scene inicio = panelAdministrador(stage, validarRecepcionista());
+                    stage.setScene(inicio);
+                    stage.centerOnScreen();
+                }
+                else {
+                    stage.setScene(error);
+                    Label err = (Label) error.lookup("#error");
+                    err.setText("Las credenciales son incorrectas");
+                    Button volver = (Button) error.lookup("#volver");
+                    volver.setOnAction(event2 -> stage.setScene(LoginPage));
+                }
             } catch (SQLException | IOException ex) {
                 System.out.println("No se pudo ejecutar la consulta: ");
                 ex.printStackTrace();
@@ -148,20 +168,6 @@ public class Hotel extends Application {
         });
 
         return LoginPage;
-    }
-
-    private void validateCredentials(Stage stage, Scene error, Scene iniciarsesion, String usuario, String password) throws SQLException, IOException {
-        if (Validar(usuario, password)) {
-            Scene inicio = panelAdministrador(stage, validarRecepcionista());
-            stage.setScene(inicio);
-            stage.centerOnScreen();
-        } else {
-            stage.setScene(error);
-            Label err = (Label) error.lookup("#error");
-            err.setText("Las credenciales son incorrectas");
-            Button volver = (Button) error.lookup("#volver");
-            volver.setOnAction(event2 -> stage.setScene(iniciarsesion));
-        }
     }
 
     public Scene pantallaRegistro(Stage stage) throws IOException {
@@ -191,7 +197,7 @@ public class Hotel extends Application {
                     Integer tlf = Integer.parseInt(telefon);
                     String email = ((TextField) registro.lookup("#email")).getText();
                     Recepcionista r1 = new Recepcionista(usuario, password, nom, cognoms, DNI, nacionalitat, tlf, email);
-                    int rows = this.mySQLRepository.UpdateRecepcionist(r1.getUsuario(), r1.getPassword(), r1.getNom(),
+                    int rows = this.mySQLRepository.RegisterRecepcionist(r1.getUsuario(), r1.getPassword(), r1.getNom(),
                             r1.getCognoms(), r1.getDNI(), r1.getNacionalitat(), r1.getTelefon(), r1.getEmail());
                     stage.setScene(confirmar);
                     Button finalizar = (Button) confirmar.lookup("#finalizar");
@@ -274,11 +280,13 @@ public class Hotel extends Application {
             var wrapper = new Object(){int rows = -1; };
             for (int i = 0; i < rs.getMetaData().getColumnCount() - 1; i++) {
                 final int j = i;
+                if(!rs.getMetaData().getColumnName(i).equals("Password")) {
+                    TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i + 1));
+                    col.setStyle( "-fx-alignment: CENTER;");
+                    col.setCellValueFactory((Callback<CellDataFeatures<ObservableList, String>, ObservableValue<String>>) param -> new SimpleStringProperty(param.getValue().get(j).toString()));
+                    tableview.getColumns().addAll(col);
+                }
 
-                TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i + 1));
-                col.setStyle( "-fx-alignment: CENTER;");
-                col.setCellValueFactory((Callback<CellDataFeatures<ObservableList, String>, ObservableValue<String>>) param -> new SimpleStringProperty(param.getValue().get(j).toString()));
-                tableview.getColumns().addAll(col);
 
 
 
