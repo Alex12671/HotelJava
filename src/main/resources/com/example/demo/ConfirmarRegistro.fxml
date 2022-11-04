@@ -15,7 +15,7 @@
     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
-      <Label fx:id="error" alignment="CENTER" contentDisplay="CENTER" text="Usuario registrado correctamente" GridPane.columnIndex="1" GridPane.rowIndex="1">
+      <Label fx:id="confirmar" alignment="CENTER" contentDisplay="CENTER" text="Usuario registrado correctamente" GridPane.columnIndex="1" GridPane.rowIndex="1">
          <font>
             <Font size="17.0" />
          </font>

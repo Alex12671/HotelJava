@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import com.dlsc.formsfx.view.controls.SimpleRadioButtonControl;
+import com.example.demo.domain.Cliente;
 import com.example.demo.domain.Recepcionista;
 import com.example.demo.infrastructure.DatabaseConnection;
 import com.example.demo.infrastructure.MySQLRepository;
@@ -134,8 +135,8 @@ public class Hotel extends Application {
             String password = ((PasswordField) LoginPage.lookup("#password")).getText();
             try {
                 if(this.mySQLRepository.GetReceptionistCredentials(usuario,password) == 1) {
-                    Scene inicio = panelAdministrador(stage, validarRecepcionista());
-                    stage.setScene(inicio);
+                    Scene ReceptionistPanel = ReceptionistPanel(stage);
+                    stage.setScene(ReceptionistPanel);
                     stage.centerOnScreen();
                 }
                 else {
@@ -174,7 +175,7 @@ public class Hotel extends Application {
         FXMLLoader fxmlLoader2 = new FXMLLoader(Hotel.class.getResource("Error.fxml"));
         Scene error = new Scene(fxmlLoader2.load());
 
-        FXMLLoader fxmlLoader = new FXMLLoader(Hotel.class.getResource("Register.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(Hotel.class.getResource("ReceptionistRegister.fxml"));
         Scene registro = new Scene(fxmlLoader.load());
 
         FXMLLoader fxmlLoad = new FXMLLoader(Hotel.class.getResource("ConfirmarRegistro.fxml"));
@@ -238,7 +239,19 @@ public class Hotel extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(Hotel.class.getResource("PanelAdmin.fxml"));
         Scene inicio = new Scene(fxmlLoader.load());
 
+        Button logOut = (Button) inicio.lookup("#logOut");
         Button validacion = (Button) inicio.lookup("#validar");
+
+        logOut.setOnAction(event -> {
+            try {
+                stage.setScene(LoginPage(stage));
+                stage.setTitle("Iniciar sesión");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+
 
         validacion.setOnAction(event -> {
             stage.setScene(validarRec);
@@ -248,6 +261,7 @@ public class Hotel extends Application {
                 throw new RuntimeException(e);
             }
         });
+
         int rows = 0;
         ResultSet rs = this.mySQLRepository.GetValidatedReceptionist();
         while (rs.next()) {
@@ -280,7 +294,7 @@ public class Hotel extends Application {
             var wrapper = new Object(){int rows = -1; };
             for (int i = 0; i < rs.getMetaData().getColumnCount() - 1; i++) {
                 final int j = i;
-                if(!rs.getMetaData().getColumnName(i).equals("Password")) {
+                if(!rs.getMetaData().getColumnName(i + 1).equals("Password")) {
                     TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i + 1));
                     col.setStyle( "-fx-alignment: CENTER;");
                     col.setCellValueFactory((Callback<CellDataFeatures<ObservableList, String>, ObservableValue<String>>) param -> new SimpleStringProperty(param.getValue().get(j).toString()));
@@ -353,5 +367,169 @@ public class Hotel extends Application {
             System.out.println("Error on Building Data");
         }
         return tableview;
+    }
+
+    public Scene ReceptionistPanel(Stage stage) throws IOException {
+        FXMLLoader fxmlLoad = new FXMLLoader(Hotel.class.getResource("ReceptionistPanel.fxml"));
+        Scene ReceptionistPanel = new Scene(fxmlLoad.load());
+
+        Button clientsManagement = (Button) ReceptionistPanel.lookup("#clientsManage");
+        Button roomReservation = (Button) ReceptionistPanel.lookup("#roomReservation");
+        Button logOut = (Button) ReceptionistPanel.lookup("#logOut");
+
+        clientsManagement.setOnAction(event -> {
+            try {
+                stage.setScene(ClientsManagement(stage));
+                stage.setTitle("Panel recepcionista");
+            } catch (IOException | SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        //ToDo: crear escena "roomReservation" y añadirla a evento
+        roomReservation.setOnAction(event -> {
+
+        });
+
+        logOut.setOnAction(event -> {
+            try {
+                stage.setScene(LoginPage(stage));
+                stage.setTitle("Iniciar sesión");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        return ReceptionistPanel;
+    }
+
+    public TableView clientsTable(Stage stage, Scene ClientsManagement) throws SQLException, IOException {
+        TableView clientsTable = (TableView) ClientsManagement.lookup("#clientsTable");
+        ObservableList<Object> data = FXCollections.observableArrayList();
+        ResultSet rs = this.mySQLRepository.GetAllClients();
+        try {
+            for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
+                final int j = i;
+                TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i + 1));
+                col.setStyle( "-fx-alignment: CENTER;");
+                col.setCellValueFactory((Callback<CellDataFeatures<ObservableList, String>, ObservableValue<String>>) param -> new SimpleStringProperty(param.getValue().get(j).toString()));
+                clientsTable.getColumns().addAll(col);
+            }
+
+            while (rs.next()) {
+                ObservableList<String> row = FXCollections.observableArrayList();
+                for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
+                    row.add(rs.getString(i));
+                }
+                data.add(row);
+
+            }
+            clientsTable.setItems(data);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error on Building Data");
+        }
+        return clientsTable;
+    }
+
+    public Scene ClientsManagement(Stage stage) throws IOException, SQLException {
+        FXMLLoader fxmlLoad = new FXMLLoader(Hotel.class.getResource("ClientsManagement.fxml"));
+        Scene ClientsManagement = new Scene(fxmlLoad.load());
+        TableView showClients = clientsTable(stage,ClientsManagement);
+
+        Button addClient = (Button) ClientsManagement.lookup("#addClient");
+        Button returnbtn = (Button) ClientsManagement.lookup("#returnToPanel");
+
+        returnbtn.setOnAction(event -> {
+            try {
+                stage.setScene(ReceptionistPanel(stage));
+                stage.setTitle("Panel recepcionista");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        addClient.setOnAction(event -> {
+            try {
+                stage.setScene(AddClient(stage));
+                stage.setTitle("Añadir cliente");
+            } catch (IOException | SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+
+
+        return ClientsManagement;
+    }
+
+    public Scene AddClient(Stage stage) throws IOException, SQLException {
+        FXMLLoader fxmlLoad = new FXMLLoader(Hotel.class.getResource("AddClient.fxml"));
+        Scene AddClient = new Scene(fxmlLoad.load());
+
+        FXMLLoader fxmlLoader2 = new FXMLLoader(Hotel.class.getResource("Error.fxml"));
+        Scene error = new Scene(fxmlLoader2.load());
+
+        FXMLLoader fxmlLoader3 = new FXMLLoader(Hotel.class.getResource("ConfirmarRegistro.fxml"));
+        Scene confirmar = new Scene(fxmlLoader3.load());
+
+        Button returnBtn = (Button) AddClient.lookup("#returnBtn");
+        Button registerBtn = (Button) AddClient.lookup("#addBtn");
+
+
+        registerBtn.setOnAction(event -> {
+            try {
+                ChoiceBox estatCivilBox = (ChoiceBox) AddClient.lookup("#estatCivil");
+                ObservableList<String> availableChoices = FXCollections.observableArrayList("Soltero", "Casado","Separado","Divorciado");
+                estatCivilBox.setItems(availableChoices);
+                String estatCivil = (String) estatCivilBox.getSelectionModel().getSelectedItem();
+                String ocupacio = ((TextField) AddClient.lookup("#ocupacio")).getText();
+                String nom = ((TextField) AddClient.lookup("#nom")).getText();
+                String cognoms = ((TextField) AddClient.lookup("#cognoms")).getText();
+                String DNI = ((TextField) AddClient.lookup("#dni")).getText();
+                String nacionalitat = ((TextField) AddClient.lookup("#nacionalitat")).getText();
+                String telefon = ((TextField) AddClient.lookup("#telefon")).getText();
+                try {
+                    Integer tlf = Integer.parseInt(telefon);
+                    String email = ((TextField) AddClient.lookup("#email")).getText();
+                    Cliente c1 = new Cliente(estatCivil, ocupacio, nom, cognoms, DNI, nacionalitat, tlf, email);
+                    int rows = this.mySQLRepository.AddClient(c1.getEstat_civil(), c1.getOcupacio(), c1.getNom(),
+                            c1.getCognoms(), c1.getDNI(), c1.getNacionalitat(), c1.getTelefon(), c1.getEmail());
+                    stage.setScene(confirmar);
+                    Label confirmacion = (Label) confirmar.lookup("#confirmar");
+                    confirmacion.setText("Cliente añadido correctamente");
+                    Button finalizar = (Button) confirmar.lookup("#finalizar");
+                    finalizar.setOnAction(event2 -> {
+                        try {
+                            stage.setScene(ClientsManagement(stage));
+                        } catch (IOException | SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                } catch (NumberFormatException e) {
+                    stage.setScene(error);
+                    Label err = (Label) error.lookup("#error");
+                    err.setText("El campo teléfono solo puede contener números");
+                    Button volver = (Button) error.lookup("#volver");
+                    volver.setOnAction(event2 -> {
+                        stage.setScene(AddClient);
+                    });
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        returnBtn.setOnAction(event -> {
+            try {
+                stage.setScene(ClientsManagement(stage));
+                stage.setTitle("Gestión de clientes");
+            } catch (IOException | SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+
+        return AddClient;
     }
 }

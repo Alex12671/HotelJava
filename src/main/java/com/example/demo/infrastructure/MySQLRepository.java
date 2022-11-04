@@ -19,7 +19,7 @@ public class MySQLRepository {
     }
 
     public int GetReceptionistCredentials(String usuario, String password) throws SQLException {
-        ResultSet rs = this.statement.executeQuery("SELECT COUNT(*) as rows FROM recepcionistas WHERE Usuario = '" + usuario + "' AND Password = '" + password + "' AND Validado = 1");
+        ResultSet rs = this.statement.executeQuery("SELECT COUNT(*) AS 'rows' FROM recepcionistas WHERE Usuario = '" + usuario + "' AND Password = '" + password + "' AND Validado = 1");
         rs.next();
         int rows = rs.getInt("rows");
         return rows;
@@ -41,5 +41,14 @@ public class MySQLRepository {
     public int RejectReceptionist(int id) throws SQLException {
 
         return this.statement.executeUpdate("DELETE FROM recepcionistas WHERE Id = '" + id + "'");
+    }
+
+    public ResultSet GetAllClients() throws SQLException {
+        return this.statement.executeQuery("SELECT * FROM clientes");
+    }
+
+    public int AddClient(String estat_civil, String ocupacio, String nom, String cognoms, String dni, String nacionalitat, Integer telefon, String email) throws SQLException {
+        return this.statement.executeUpdate("INSERT INTO clientes VALUES ('" + dni + "','" + nom +
+                "','" + cognoms + "','" + nacionalitat + "','" + telefon + "','" + email + "','" + ocupacio + "','" + estat_civil + "')");
     }
 }
