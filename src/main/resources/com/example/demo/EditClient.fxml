@@ -21,6 +21,18 @@
     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
+      <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.columnSpan="2">
+         <children>
+            <Label text="Editar cliente">
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
+               <font>
+                  <Font name="Baskerville Old Face" size="40.0" />
+               </font>
+            </Label>
+         </children>
+      </StackPane>
       <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="1">
          <children>
             <Label alignment="CENTER" text="DNI">
@@ -38,18 +50,6 @@
                   <Insets left="30.0" />
                </HBox.margin></TextField>
          </children></HBox>
-      <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.columnSpan="2">
-         <children>
-            <Label text="Añadir cliente">
-               <padding>
-                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-               </padding>
-               <font>
-                  <Font name="Baskerville Old Face" size="40.0" />
-               </font>
-            </Label>
-         </children>
-      </StackPane>
       <HBox alignment="CENTER" layoutX="10.0" layoutY="110.0" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="2">
          <children>
             <Label alignment="CENTER" text="Nom">
@@ -92,7 +92,7 @@
          <children>
             <Label text="Nacionalitat">
                <font>
-                  <Font size="18.0" />
+                  <Font name="Baskerville Old Face" size="18.0" />
                </font>
                <HBox.margin>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -103,7 +103,7 @@
       </HBox>
       <HBox alignment="CENTER" layoutX="410.0" layoutY="410.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
          <children>
-            <Label alignment="CENTER" text="Ocupacio">
+            <Label alignment="CENTER" text="Telefon">
                <font>
                   <Font name="Baskerville Old Face" size="18.0" />
                </font>
@@ -111,26 +111,7 @@
                   <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                </opaqueInsets>
                <HBox.margin>
-                  <Insets bottom="7.0" left="7.0" right="7.0" top="7.0" />
-               </HBox.margin>
-            </Label>
-            <TextField fx:id="ocupacio">
-               <HBox.margin>
-                  <Insets />
-               </HBox.margin></TextField>
-         </children>
-      </HBox>
-      <HBox alignment="CENTER" layoutX="10.0" layoutY="10.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
-         <children>
-            <Label alignment="CENTER" text="Telèfon">
-               <font>
-                  <Font name="Baskerville Old Face" size="18.0" />
-               </font>
-               <opaqueInsets>
-                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-               </opaqueInsets>
-               <HBox.margin>
-                  <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                  <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
                </HBox.margin>
             </Label>
             <TextField fx:id="telefon">
@@ -139,7 +120,7 @@
                </HBox.margin></TextField>
          </children>
       </HBox>
-      <HBox alignment="CENTER" layoutX="10.0" layoutY="10.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+      <HBox alignment="CENTER" layoutX="10.0" layoutY="10.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
          <children>
             <Label alignment="CENTER" text="Email">
                <font>
@@ -149,10 +130,29 @@
                   <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                </opaqueInsets>
                <HBox.margin>
-                  <Insets bottom="23.0" left="23.0" right="23.0" top="23.0" />
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                </HBox.margin>
             </Label>
             <TextField fx:id="email">
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin></TextField>
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" layoutX="10.0" layoutY="10.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+         <children>
+            <Label alignment="CENTER" text="Ocupacio">
+               <font>
+                  <Font name="Baskerville Old Face" size="18.0" />
+               </font>
+               <opaqueInsets>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </opaqueInsets>
+               <HBox.margin>
+                  <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+               </HBox.margin>
+            </Label>
+            <TextField fx:id="ocupacio">
                <HBox.margin>
                   <Insets />
                </HBox.margin></TextField>
@@ -162,13 +162,13 @@
          <children>
             <Label text="Estat Civil">
                <font>
-                  <Font size="18.0" />
+                  <Font name="Baskerville Old Face" size="18.0" />
                </font>
                <HBox.margin>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </HBox.margin>
             </Label>
-            <ChoiceBox fx:id="estatCivil" prefWidth="150.0">
+            <ComboBox fx:id="estatCivil" prefWidth="150.0">
                <items>
                   <FXCollections fx:factory="observableArrayList">
                      <String fx:value="Soltero/a" />
@@ -177,12 +177,12 @@
                      <String fx:value="Divorciado/a" />
                   </FXCollections>
                </items>
-            </ChoiceBox>
+            </ComboBox>
          </children>
       </HBox>
       <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="5">
          <children>
-            <Button fx:id="addBtn" mnemonicParsing="false" text="Añadir">
+            <Button fx:id="editBtn" mnemonicParsing="false" text="Editar">
                <font>
                   <Font name="Baskerville Old Face" size="23.0" />
                </font>

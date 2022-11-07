@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
+<?import javafx.collections.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -86,6 +88,19 @@
                </HBox.margin></TextField>
          </children>
       </HBox>
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="4">
+         <children>
+            <Label text="Nacionalitat">
+               <font>
+                  <Font size="18.0" />
+               </font>
+               <HBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </HBox.margin>
+            </Label>
+            <TextField fx:id="nacionalitat" />
+         </children>
+      </HBox>
       <HBox alignment="CENTER" layoutX="410.0" layoutY="410.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
          <children>
             <Label alignment="CENTER" text="Ocupacio">
@@ -143,6 +158,28 @@
                </HBox.margin></TextField>
          </children>
       </HBox>
+      <HBox fx:id="estatCivilBox" alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
+         <children>
+            <Label text="Estat Civil">
+               <font>
+                  <Font size="18.0" />
+               </font>
+               <HBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </HBox.margin>
+            </Label>
+            <ChoiceBox fx:id="estatCivil" prefWidth="150.0">
+               <items>
+                  <FXCollections fx:factory="observableArrayList">
+                     <String fx:value="Soltero/a" />
+                     <String fx:value="Casado/a" />
+                     <String fx:value="Separado/a" />
+                     <String fx:value="Divorciado/a" />
+                  </FXCollections>
+               </items>
+            </ChoiceBox>
+         </children>
+      </HBox>
       <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="5">
          <children>
             <Button fx:id="addBtn" mnemonicParsing="false" text="Añadir">
@@ -153,7 +190,7 @@
                   <Insets left="100.0" right="100.0" />
                </padding>
             </Button>
-            <Button fx:id="returnBtn" alignment="BOTTOM_LEFT" mnemonicParsing="false" text="Volver a login">
+            <Button fx:id="returnBtn" alignment="BOTTOM_LEFT" mnemonicParsing="false" text="Volver a panel">
                <font>
                   <Font name="Baskerville Old Face" size="23.0" />
                </font>
@@ -164,31 +201,5 @@
                   <Insets left="50.0" />
                </HBox.margin></Button>
          </children></HBox>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="4">
-         <children>
-            <Label text="Nacionalitat">
-               <font>
-                  <Font size="18.0" />
-               </font>
-               <HBox.margin>
-                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-               </HBox.margin>
-            </Label>
-            <TextField fx:id="nacionalitat" />
-         </children>
-      </HBox>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
-         <children>
-            <Label text="Estat Civil">
-               <font>
-                  <Font size="18.0" />
-               </font>
-               <HBox.margin>
-                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-               </HBox.margin>
-            </Label>
-            <ChoiceBox fx:id="estatCivil" prefWidth="150.0" />
-         </children>
-      </HBox>
    </children>
 </GridPane>

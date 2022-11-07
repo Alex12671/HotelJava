@@ -34,6 +34,15 @@
             </Label>
          </children>
       </StackPane>
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+         <children>
+            <Button fx:id="roomManagement" mnemonicParsing="false" text="Gestión de habitaciones">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Button>
+         </children>
+      </HBox>
       <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
          <children>
             <Button fx:id="logOut" mnemonicParsing="false" text="Cerrar sesión">

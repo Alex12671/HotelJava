@@ -3,6 +3,7 @@ package com.example.demo.infrastructure;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 public class MySQLRepository {
     private Statement statement;
@@ -44,11 +45,27 @@ public class MySQLRepository {
     }
 
     public ResultSet GetAllClients() throws SQLException {
-        return this.statement.executeQuery("SELECT * FROM clientes");
+        return this.statement.executeQuery("SELECT * FROM clientes WHERE Activado = 1");
     }
 
     public int AddClient(String estat_civil, String ocupacio, String nom, String cognoms, String dni, String nacionalitat, Integer telefon, String email) throws SQLException {
         return this.statement.executeUpdate("INSERT INTO clientes VALUES ('" + dni + "','" + nom +
-                "','" + cognoms + "','" + nacionalitat + "','" + telefon + "','" + email + "','" + ocupacio + "','" + estat_civil + "')");
+                "','" + cognoms + "','" + nacionalitat + "','" + telefon + "','" + email + "','" + ocupacio + "','" + estat_civil + "',1)");
+    }
+
+    public int DeleteClient(String DNI) throws SQLException {
+        return this.statement.executeUpdate("UPDATE clientes SET Activado = 0 WHERE DNI = '" + DNI + "'");
+    }
+
+    public int EditClient(ArrayList array,String DNI) throws SQLException {
+        return this.statement.executeUpdate("UPDATE clientes SET DNI = '" + array.get(0) + "', Nom = '" + array.get(1) + "', Cognoms = '" + array.get(2) + "', Nacionalitat = '" + array.get(3) + "', Telefon = '" + array.get(4) + "', Email = '" + array.get(5) + "', Ocupacio = '" + array.get(6) + "', Estat_Civil = '" + array.get(7) + "' WHERE DNI = " + DNI + "");
+    }
+
+    public ResultSet GetAllRooms() throws SQLException {
+        return this.statement.executeQuery("SELECT * FROM habitaciones");
+    }
+
+    public int DeleteRoom(String numero) throws SQLException {
+        return this.statement.executeUpdate("UPDATE habitaciones SET Activado = 0 WHERE Numero = '" + numero + "'");
     }
 }
