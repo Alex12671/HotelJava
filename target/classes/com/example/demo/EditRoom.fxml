@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.collections.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
 <GridPane fx:id="gridPane" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
   <columnConstraints>
     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -19,6 +19,7 @@
     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
       <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="1">
@@ -40,7 +41,7 @@
          </children></HBox>
       <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.columnSpan="2">
          <children>
-            <Label text="Añadir habitación">
+            <Label text="Editar habitación">
                <padding>
                   <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                </padding>
@@ -90,7 +91,7 @@
       </HBox>
       <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="4">
          <children>
-            <Label text="Tipo">
+            <Label text="Estado">
                <font>
                   <Font size="18.0" />
                </font>
@@ -98,7 +99,28 @@
                   <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
                </HBox.margin>
             </Label>
-            <ChoiceBox fx:id="roomType" prefWidth="150.0">
+            <ComboBox fx:id="roomState" prefWidth="150.0" >
+               <items>
+                  <FXCollections fx:factory="observableArrayList">
+                     <String fx:value="Disponible" />
+                     <String fx:value="Ocupado" />
+                     <String fx:value="En mantenimiento" />
+                  </FXCollections>
+               </items>
+            </ComboBox>
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" layoutX="10.0" layoutY="268.0" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="5">
+         <children>
+            <Label text="Tipo">
+               <font>
+                  <Font size="18.0" />
+               </font>
+               <HBox.margin>
+                  <Insets bottom="38.0" left="38.0" right="38.0" top="38.0" />
+               </HBox.margin>
+            </Label>
+            <ComboBox fx:id="roomType" prefWidth="150.0" >
                <items>
                   <FXCollections fx:factory="observableArrayList">
                      <String fx:value="Individual" />
@@ -106,10 +128,7 @@
                      <String fx:value="Familiar" />
                   </FXCollections>
                </items>
-               <HBox.margin>
-                  <Insets />
-               </HBox.margin>
-            </ChoiceBox>
+            </ComboBox>
          </children>
       </HBox>
       <HBox alignment="CENTER" layoutX="410.0" layoutY="410.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
@@ -163,14 +182,14 @@
                   <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
                </HBox.margin>
             </Label>
-            <ChoiceBox fx:id="wifi" prefWidth="150.0">
+            <ComboBox fx:id="wifi" prefWidth="150.0" >
                <items>
                   <FXCollections fx:factory="observableArrayList">
                      <String fx:value="Si" />
                      <String fx:value="No" />
                   </FXCollections>
                </items>
-            </ChoiceBox>
+            </ComboBox>
          </children>
       </HBox>
       <HBox fx:id="estatCivilBox" alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
@@ -183,19 +202,19 @@
                   <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
                </HBox.margin>
             </Label>
-            <ChoiceBox fx:id="minibar" prefWidth="150.0">
+            <ComboBox fx:id="minibar" prefWidth="150.0" >
                <items>
                   <FXCollections fx:factory="observableArrayList">
                      <String fx:value="Si" />
                      <String fx:value="No" />
                   </FXCollections>
                </items>
-            </ChoiceBox>
+            </ComboBox>
          </children>
       </HBox>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="5">
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="6">
          <children>
-            <Button fx:id="addBtn" mnemonicParsing="false" text="Añadir">
+            <Button fx:id="editBtn" mnemonicParsing="false" text="Editar">
                <font>
                   <Font name="Baskerville Old Face" size="23.0" />
                </font>

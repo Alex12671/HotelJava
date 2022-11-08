@@ -46,17 +46,17 @@
       </HBox>
       <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="4">
          <children>
-            <Button fx:id="editClient" mnemonicParsing="false" text="Editar habitación seleccionada" />
+            <Button fx:id="editRoom" mnemonicParsing="false" text="Editar habitación seleccionada" />
          </children>
       </HBox>
       <HBox alignment="TOP_CENTER" layoutX="10.0" layoutY="560.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
          <children>
-            <Button fx:id="deleteClient" mnemonicParsing="false" text="Eliminar habitación seleccionada" />
+            <Button fx:id="deleteRoom" mnemonicParsing="false" text="Eliminar habitación seleccionada" />
          </children>
       </HBox>
       <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="1">
          <children>
-            <Button fx:id="addClient" mnemonicParsing="false" text="Añadir nueva habitación">
+            <Button fx:id="addRoom" mnemonicParsing="false" text="Añadir nueva habitación">
                <font>
                   <Font size="27.0" />
                </font>

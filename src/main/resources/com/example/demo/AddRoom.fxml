@@ -31,7 +31,7 @@
                   <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                </opaqueInsets>
                <HBox.margin>
-                  <Insets bottom="23.0" left="23.0" right="23.0" top="23.0" />
+                  <Insets />
                </HBox.margin></Label>
             <TextField fx:id="roomNumber">
                <HBox.margin>
@@ -60,7 +60,7 @@
                   <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                </opaqueInsets>
                <HBox.margin>
-                  <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+                  <Insets />
                </HBox.margin>
             </Label>
             <TextField fx:id="roomFloor">
@@ -79,7 +79,7 @@
                   <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                </opaqueInsets>
                <HBox.margin>
-                  <Insets bottom="11.0" left="11.0" right="11.0" top="11.0" />
+                  <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
                </HBox.margin>
             </Label>
             <TextField fx:id="price">
@@ -95,7 +95,7 @@
                   <Font size="18.0" />
                </font>
                <HBox.margin>
-                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                  <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
                </HBox.margin>
             </Label>
             <ChoiceBox fx:id="roomType" prefWidth="150.0">
@@ -106,6 +106,9 @@
                      <String fx:value="Familiar" />
                   </FXCollections>
                </items>
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
             </ChoiceBox>
          </children>
       </HBox>
@@ -119,7 +122,7 @@
                   <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                </opaqueInsets>
                <HBox.margin>
-                  <Insets bottom="7.0" left="7.0" right="7.0" top="7.0" />
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
             </Label>
             <TextField fx:id="bedsNumber">
@@ -138,7 +141,7 @@
                   <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                </opaqueInsets>
                <HBox.margin>
-                  <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                  <Insets bottom="22.0" left="22.0" right="22.0" top="22.0" />
                </HBox.margin>
             </Label>
             <TextField fx:id="squareFootage">
@@ -157,7 +160,7 @@
                   <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                </opaqueInsets>
                <HBox.margin>
-                  <Insets bottom="23.0" left="23.0" right="23.0" top="23.0" />
+                  <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
                </HBox.margin>
             </Label>
             <ChoiceBox fx:id="wifi" prefWidth="150.0">
@@ -177,7 +180,7 @@
                   <Font size="18.0" />
                </font>
                <HBox.margin>
-                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                  <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
                </HBox.margin>
             </Label>
             <ChoiceBox fx:id="minibar" prefWidth="150.0">

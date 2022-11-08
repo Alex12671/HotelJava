@@ -62,10 +62,19 @@ public class MySQLRepository {
     }
 
     public ResultSet GetAllRooms() throws SQLException {
-        return this.statement.executeQuery("SELECT * FROM habitaciones");
+        return this.statement.executeQuery("SELECT * FROM habitaciones WHERE Activado = 1");
     }
 
     public int DeleteRoom(String numero) throws SQLException {
         return this.statement.executeUpdate("UPDATE habitaciones SET Activado = 0 WHERE Numero = '" + numero + "'");
+    }
+
+    public int AddRoom(ArrayList array) throws SQLException {
+        return this.statement.executeUpdate("INSERT INTO habitaciones VALUES ('" + array.get(0) + "','" + array.get(1) +
+                "','" + array.get(2) + "','Disponible','" + array.get(3) + "','" + array.get(4) + "','" + array.get(5) + "','" + array.get(6) + "','" + array.get(7) + "',1)");
+    }
+
+    public int EditRoom(ArrayList array,int num) throws SQLException {
+        return this.statement.executeUpdate("UPDATE habitaciones SET Numero = '" + array.get(0) + "', Planta = '" + array.get(1) + "', Precio = '" + array.get(2) + "', Estado = '" + array.get(3) + "', Tipo = '" + array.get(4) + "', Numero_Camas = '" + array.get(5) + "', Superficie = '" + array.get(6) + "', Wifi = '" + array.get(7) + "', Minibar = '" + array.get(8) + "' WHERE Numero = " + num + "");
     }
 }

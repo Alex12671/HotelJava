@@ -404,33 +404,32 @@ public class Escena {
 
         TableView showRooms = roomTable(stage,roomManagement);
 
-        Button addClient = (Button) roomManagement.lookup("#addClient");
+        Button addRoomBtn = (Button) roomManagement.lookup("#addRoom");
         Button returnbtn = (Button) roomManagement.lookup("#returnToPanel");
-        Button deleteClientBtn = (Button) roomManagement.lookup("#deleteClient");
-        Button editClientBtn = (Button) roomManagement.lookup("#editClient");
+        Button deleteRoomBtn = (Button) roomManagement.lookup("#deleteRoom");
+        Button editRoomBtn = (Button) roomManagement.lookup("#editRoom");
 
-        editClientBtn.setOnAction(event -> {
+        editRoomBtn.setOnAction(event -> {
             List selected = showRooms.getSelectionModel().getSelectedItems();
             if(!selected.isEmpty()) {
                 try {
-                    stage.setScene(EditClient(stage, (List) selected.get(0)));
-                    stage.setTitle("Editar cliente");
+                    stage.setScene(EditRoom(stage, (List) selected.get(0)));
+                    stage.setTitle("Editar habitación");
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }
             else {
                 try {
-                    stage.setScene(Error(stage,"Por favor, seleccione un cliente",RoomManagement(stage)));
+                    stage.setScene(Error(stage,"Por favor, seleccione una habitación",RoomManagement(stage)));
                 } catch (IOException | SQLException e) {
                     throw new RuntimeException(e);
                 }
-                stage.setTitle("Editar cliente");
             }
 
         });
 
-        deleteClientBtn.setOnAction(event -> {
+        deleteRoomBtn.setOnAction(event -> {
             if(showRooms.getSelectionModel().getSelectedCells().isEmpty()) {
                 try {
                     stage.setScene(Error(stage,"Por favor, seleccione una habitación",RoomManagement(stage)));
@@ -462,7 +461,7 @@ public class Escena {
             }
         });
 
-        addClient.setOnAction(event -> {
+        addRoomBtn.setOnAction(event -> {
             try {
                 stage.setScene(AddRoom(stage));
                 stage.setTitle("Añadir cliente");
@@ -479,7 +478,7 @@ public class Escena {
         ObservableList<Object> data = FXCollections.observableArrayList();
         ResultSet rs = this.mySQLRepository.GetAllRooms();
         try {
-            for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
+            for (int i = 0; i < rs.getMetaData().getColumnCount() - 1; i++) {
                 final int j = i;
                 TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i + 1));
                 col.setStyle( "-fx-alignment: CENTER;");
@@ -512,15 +511,93 @@ public class Escena {
         GridPane gridPane = (GridPane) addRoom.lookup("#gridPane");
 
         addBtn.setOnAction(event -> {
-            String dni = "";
             ArrayList values = new ArrayList<>();
             for (Node node : gridPane.getChildren()) {
                 if (node instanceof HBox) {
                     for(Node node1: ((HBox) node).getChildren()) {
                         if (node1 instanceof TextField) {
                             TextField text = (TextField) addRoom.lookup("#" + node1.getId());
-                            if(node1.getId().equals("dni")) {
-                                dni = text.getPromptText();
+                            if(!text.getText().isEmpty()) {
+                                values.add(text.getText());
+                            }
+
+                        }
+                        else if (node1 instanceof ChoiceBox) {
+                            ChoiceBox comBox = (ChoiceBox) addRoom.lookup("#" + node1.getId());
+                            if(comBox.getSelectionModel().getSelectedItem() != null) {
+                                values.add(comBox.getSelectionModel().getSelectedItem());
+                            }
+
+                        }
+
+                    }
+                }
+            }
+            try {
+                if(values.size() == 8) {
+                    if(this.mySQLRepository.AddRoom(values) == 1) {
+                        stage.setScene(RoomManagement(stage));
+                    }
+                }
+                else {
+                    stage.setScene(Error(stage,"No pueden haber campos vacíos.",AddRoom(stage)));
+                }
+
+            } catch (SQLException | IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        returnBtn.setOnAction(event -> {
+            try {
+                stage.setScene(RoomManagement(stage));
+                stage.setTitle("Gestión de habitaciones");
+            } catch (IOException | SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+
+        return addRoom;
+    }
+
+    public Scene EditRoom(Stage stage,List list) throws IOException {
+
+        FXMLLoader fxmlLoad = new FXMLLoader(Hotel.class.getResource("EditRoom.fxml"));
+        Scene editClient = new javafx.scene.Scene(fxmlLoad.load());
+
+        Button returnBtn = (Button) editClient.lookup("#returnBtn");
+        Button editBtn = (Button) editClient.lookup("#editBtn");
+        GridPane gridPane = (GridPane) editClient.lookup("#gridPane");
+
+        int i = 0;
+        for (Node node : gridPane.getChildren()) {
+            if (node instanceof HBox) {
+                for(Node node1: ((HBox) node).getChildren()) {
+                    if (node1 instanceof TextField) {
+                        TextField text = (TextField) editClient.lookup("#" + node1.getId());
+                        text.setPromptText((String) list.get(i));
+                    }
+                    else if (node1 instanceof ComboBox) {
+                        ComboBox comBox = (ComboBox) editClient.lookup("#" + node1.getId());
+                        comBox.setPromptText((String) list.get(i));
+                    }
+
+                }
+                i++;
+            }
+        }
+
+        editBtn.setOnAction(event -> {
+            int num = 0;
+            ArrayList values = new ArrayList<>();
+            for (Node node : gridPane.getChildren()) {
+                if (node instanceof HBox) {
+                    for(Node node1: ((HBox) node).getChildren()) {
+                        if (node1 instanceof TextField) {
+                            TextField text = (TextField) editClient.lookup("#" + node1.getId());
+                            if(node1.getId().equals("roomNumber")) {
+                                num = Integer.parseInt(text.getPromptText());
                             }
                             if(text.getText().equals("")) {
                                 values.add(text.getPromptText());
@@ -531,7 +608,7 @@ public class Escena {
 
                         }
                         else if (node1 instanceof ComboBox) {
-                            ComboBox estadoCivil = (ComboBox) addRoom.lookup("#" + node1.getId());
+                            ComboBox estadoCivil = (ComboBox) editClient.lookup("#" + node1.getId());
                             if(estadoCivil.getSelectionModel().getSelectedItem() == null) {
                                 values.add(estadoCivil.getPromptText());
                             }
@@ -544,9 +621,8 @@ public class Escena {
                 }
             }
             try {
-                System.out.println(dni);
-                this.mySQLRepository.EditClient(values,dni);
-                stage.setScene(ClientsManagement(stage));
+                this.mySQLRepository.EditRoom(values,num);
+                stage.setScene(RoomManagement(stage));
             } catch (SQLException | IOException e) {
                 throw new RuntimeException(e);
             }
@@ -555,14 +631,14 @@ public class Escena {
         returnBtn.setOnAction(event -> {
             try {
                 stage.setScene(RoomManagement(stage));
-                stage.setTitle("Gestión de clientes");
+                stage.setTitle("Gestión de habitaciones");
             } catch (IOException | SQLException e) {
                 throw new RuntimeException(e);
             }
         });
 
 
-        return addRoom;
+        return editClient;
     }
 
     public TableView clientsTable(Stage stage, Scene ClientsManagement) throws SQLException {
