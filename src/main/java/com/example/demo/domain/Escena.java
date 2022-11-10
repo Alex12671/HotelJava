@@ -20,6 +20,8 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -235,7 +237,7 @@ public class Escena {
             }
         });
 
-        //ToDo: acabar gestión de habitaciones
+
         roomManagement.setOnAction(event -> {
             try {
                 stage.setScene(RoomManagement(stage));
@@ -381,6 +383,15 @@ public class Escena {
 
         //ToDo: crear escena "roomReservation" y añadirla a evento
         roomReservation.setOnAction(event -> {
+            try {
+                stage.setScene(RoomReservation(stage));
+                stage.setTitle("Reserva de habitaciones");
+                stage.centerOnScreen();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
 
         });
 
@@ -396,7 +407,7 @@ public class Escena {
         return ReceptionistPanel;
     }
 
-    //ToDo: terminar la gestión de habitaciones lo antes posible, reutilizar código de gestión de clientes.
+
     public Scene RoomManagement(Stage stage) throws IOException, SQLException {
 
         FXMLLoader fxmlLoad = new FXMLLoader(Hotel.class.getResource("RoomManagement.fxml"));
@@ -887,6 +898,56 @@ public class Escena {
 
 
         return editClient;
+    }
+
+    public Scene RoomReservation(Stage stage) throws IOException, SQLException {
+        FXMLLoader fxmlLoad = new FXMLLoader(Hotel.class.getResource("RoomReservation.fxml"));
+        Scene roomReservation = new javafx.scene.Scene(fxmlLoad.load());
+        TableView showReservations = reservationTable(stage,roomReservation);
+        GridPane reservationGrid = (GridPane) roomReservation.lookup("#reservationGrid");
+        reservationGrid.setVisible(false);
+        HBox tableContainer = (HBox) roomReservation.lookup("#tableContainer");
+        reservationGrid.setStyle("-fx-background-color: #6366f1;");
+        tableContainer.setStyle("-fx-background-color: #156F70;");
+        showReservations.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                reservationGrid.setVisible(true);
+            }
+        });
+
+
+
+
+        return roomReservation;
+    }
+
+    public TableView reservationTable(Stage stage, Scene ClientsManagement) throws SQLException {
+        TableView reservationTable = (TableView) ClientsManagement.lookup("#reservationTable");
+        ObservableList<Object> data = FXCollections.observableArrayList();
+        ResultSet rs = this.mySQLRepository.GetAllReservations();
+        try {
+            for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
+                final int j = i;
+                TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i + 1));
+                col.setStyle( "-fx-alignment: CENTER;");
+                col.setCellValueFactory((Callback<TableColumn.CellDataFeatures<ObservableList, String>, ObservableValue<String>>) param -> new SimpleStringProperty(param.getValue().get(j).toString()));
+                reservationTable.getColumns().addAll(col);
+            }
+
+            while (rs.next()) {
+                ObservableList<String> row = FXCollections.observableArrayList();
+                for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
+                    row.add(rs.getString(i));
+                }
+                data.add(row);
+
+            }
+            reservationTable.setItems(data);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error on Building Data");
+        }
+        return reservationTable;
     }
 
 }

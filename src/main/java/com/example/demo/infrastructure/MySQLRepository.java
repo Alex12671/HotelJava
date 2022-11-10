@@ -77,4 +77,8 @@ public class MySQLRepository {
     public int EditRoom(ArrayList array,int num) throws SQLException {
         return this.statement.executeUpdate("UPDATE habitaciones SET Numero = '" + array.get(0) + "', Planta = '" + array.get(1) + "', Precio = '" + array.get(2) + "', Estado = '" + array.get(3) + "', Tipo = '" + array.get(4) + "', Numero_Camas = '" + array.get(5) + "', Superficie = '" + array.get(6) + "', Wifi = '" + array.get(7) + "', Minibar = '" + array.get(8) + "' WHERE Numero = " + num + "");
     }
+
+    public ResultSet GetAllReservations() throws SQLException {
+        return this.statement.executeQuery("SELECT * FROM reservas");
+    }
 }
