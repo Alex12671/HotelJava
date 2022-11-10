@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 04-11-2022 a las 13:25:32
+-- Tiempo de generación: 10-11-2022 a las 08:46:19
 -- Versión del servidor: 10.4.24-MariaDB
 -- Versión de PHP: 8.1.6
 
@@ -20,8 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `hotel`
 --
-CREATE DATABASE IF NOT EXISTS `hotel` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `hotel`;
 
 -- --------------------------------------------------------
 
@@ -54,9 +52,45 @@ CREATE TABLE `clientes` (
   `Nacionalitat` text NOT NULL,
   `Telefon` int(18) NOT NULL,
   `Email` varchar(255) NOT NULL,
-  `Ocupació` varchar(255) NOT NULL,
-  `Estat Civil` enum('Casado/a','Soltero/a','Separado/a','Divorciado/a','Viudo/a') NOT NULL
+  `Ocupacio` varchar(255) NOT NULL,
+  `Estat_Civil` enum('Casado/a','Soltero/a','Separado/a','Divorciado/a','Viudo/a') NOT NULL,
+  `Activado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `clientes`
+--
+
+INSERT INTO `clientes` (`DNI`, `Nom`, `Cognoms`, `Nacionalitat`, `Telefon`, `Email`, `Ocupacio`, `Estat_Civil`, `Activado`) VALUES
+('1', 'cliente', '3', 'e', 58, 'd', 'c', 'Separado/a', 0),
+('54928153A', 'cliente', '3', 'Español', 635120485, 'cliente3@mail.es', 'Albañil', 'Separado/a', 1),
+('58496527L', 'r', 'j', 'sc', 25, 'polñ', 'p', 'Divorciado/a', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `habitaciones`
+--
+
+CREATE TABLE `habitaciones` (
+  `Numero` int(11) NOT NULL,
+  `Planta` int(11) NOT NULL,
+  `Precio` int(11) NOT NULL,
+  `Estado` enum('Disponible','Ocupado','En mantenimiento') NOT NULL DEFAULT 'Disponible',
+  `Tipo` enum('Individual','Doble','Familiar') NOT NULL,
+  `Numero_Camas` int(1) NOT NULL,
+  `Superficie` varchar(20) NOT NULL,
+  `Wifi` enum('Si','No') NOT NULL,
+  `Minibar` enum('Si','No') NOT NULL,
+  `Activado` tinyint(1) NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `habitaciones`
+--
+
+INSERT INTO `habitaciones` (`Numero`, `Planta`, `Precio`, `Estado`, `Tipo`, `Numero_Camas`, `Superficie`, `Wifi`, `Minibar`, `Activado`) VALUES
+(1, 2, 18, 'Disponible', 'Doble', 1, '20', 'Si', 'No', 1);
 
 -- --------------------------------------------------------
 
@@ -96,6 +130,12 @@ ALTER TABLE `clientes`
   ADD PRIMARY KEY (`DNI`);
 
 --
+-- Indices de la tabla `habitaciones`
+--
+ALTER TABLE `habitaciones`
+  ADD PRIMARY KEY (`Numero`);
+
+--
 -- Indices de la tabla `recepcionistas`
 --
 ALTER TABLE `recepcionistas`
@@ -109,7 +149,7 @@ ALTER TABLE `recepcionistas`
 -- AUTO_INCREMENT de la tabla `recepcionistas`
 --
 ALTER TABLE `recepcionistas`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
