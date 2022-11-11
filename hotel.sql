@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 10-11-2022 a las 08:46:19
+-- Tiempo de generación: 11-11-2022 a las 06:33:53
 -- Versión del servidor: 10.4.24-MariaDB
 -- Versión de PHP: 8.1.6
 
@@ -20,6 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `hotel`
 --
+CREATE DATABASE IF NOT EXISTS `hotel` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `hotel`;
 
 -- --------------------------------------------------------
 
@@ -119,6 +121,32 @@ INSERT INTO `recepcionistas` (`Id`, `Usuario`, `Password`, `Nombre`, `Apellidos`
 (1, 'a', 'b', 'c', 'd', 'e', 'f', 7878, 'h', 1),
 (2, 'recep2', '1', 'recep', '2', '12345678B', 'ESP', 123456798, 'recep2@mail.es', 0);
 
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `reservas`
+--
+
+CREATE TABLE `reservas` (
+  `IdReserva` int(11) NOT NULL,
+  `IdCliente` varchar(9) NOT NULL,
+  `IdRecepcionista` varchar(9) NOT NULL,
+  `Numero` int(11) NOT NULL,
+  `Fecha_Ingreso` date NOT NULL,
+  `Hora_Ingreso` time NOT NULL,
+  `Fecha_Salida` date NOT NULL,
+  `Hora_Salida` time NOT NULL,
+  `Costo` int(11) NOT NULL,
+  `Estado` enum('Anulada','Pagada','Pendiente de pago') NOT NULL DEFAULT 'Pendiente de pago'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `reservas`
+--
+
+INSERT INTO `reservas` (`IdReserva`, `IdCliente`, `IdRecepcionista`, `Numero`, `Fecha_Ingreso`, `Hora_Ingreso`, `Fecha_Salida`, `Hora_Salida`, `Costo`, `Estado`) VALUES
+(1, '54928153A', '12345678B', 1, '2022-11-11', '06:00:31', '2022-11-18', '06:01:31', 25, 'Pendiente de pago');
+
 --
 -- Índices para tablas volcadas
 --
@@ -139,7 +167,17 @@ ALTER TABLE `habitaciones`
 -- Indices de la tabla `recepcionistas`
 --
 ALTER TABLE `recepcionistas`
-  ADD PRIMARY KEY (`Id`);
+  ADD PRIMARY KEY (`Id`),
+  ADD KEY `DNI` (`DNI`);
+
+--
+-- Indices de la tabla `reservas`
+--
+ALTER TABLE `reservas`
+  ADD PRIMARY KEY (`IdReserva`),
+  ADD UNIQUE KEY `IdCliente` (`IdCliente`,`IdRecepcionista`,`Numero`),
+  ADD KEY `Numero` (`Numero`),
+  ADD KEY `IdRecepcionista` (`IdRecepcionista`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -150,6 +188,24 @@ ALTER TABLE `recepcionistas`
 --
 ALTER TABLE `recepcionistas`
   MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT de la tabla `reservas`
+--
+ALTER TABLE `reservas`
+  MODIFY `IdReserva` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- Restricciones para tablas volcadas
+--
+
+--
+-- Filtros para la tabla `reservas`
+--
+ALTER TABLE `reservas`
+  ADD CONSTRAINT `reservas_ibfk_1` FOREIGN KEY (`Numero`) REFERENCES `habitaciones` (`Numero`),
+  ADD CONSTRAINT `reservas_ibfk_2` FOREIGN KEY (`IdRecepcionista`) REFERENCES `recepcionistas` (`DNI`),
+  ADD CONSTRAINT `reservas_ibfk_3` FOREIGN KEY (`IdCliente`) REFERENCES `clientes` (`DNI`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
