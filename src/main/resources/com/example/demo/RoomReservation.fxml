@@ -5,9 +5,9 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1500.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1700.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
   <columnConstraints>
-    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="35.0" prefWidth="100.0" />
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="40.0" prefWidth="100.0" />
     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
   </columnConstraints>
   <rowConstraints>
@@ -90,160 +90,16 @@
                   <Insets top="20.0" />
                </GridPane.margin>
             </Separator>
-            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="2">
-               <children>
-                  <Label text="Habitación:">
-                     <font>
-                        <Font size="17.0" />
-                     </font>
-                     <HBox.margin>
-                        <Insets right="50.0" />
-                     </HBox.margin>
-                  </Label>
-                  <TextField editable="false">
-                     <padding>
-                        <Insets bottom="5.0" left="40.0" right="40.0" top="5.0" />
-                     </padding>
-                  </TextField>
-                  <Button mnemonicParsing="false" text="...">
-                     <HBox.margin>
-                        <Insets left="10.0" />
-                     </HBox.margin>
-                     <padding>
-                        <Insets bottom="5.0" left="20.0" right="20.0" top="5.0" />
-                     </padding>
-                  </Button>
-               </children></HBox>
-            <HBox alignment="CENTER" layoutX="10.0" layoutY="72.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="3">
-               <children>
-                  <Label text="Cliente: ">
-                     <font>
-                        <Font size="17.0" />
-                     </font>
-                     <HBox.margin>
-                        <Insets right="27.0" />
-                     </HBox.margin>
-                  </Label>
-                  <TextField>
-                     <padding>
-                        <Insets bottom="5.0" left="40.0" right="40.0" top="5.0" />
-                     </padding>
-                     <HBox.margin>
-                        <Insets left="45.0" />
-                     </HBox.margin>
-                  </TextField>
-                  <Button mnemonicParsing="false" text="...">
-                     <padding>
-                        <Insets bottom="5.0" left="20.0" right="20.0" top="5.0" />
-                     </padding>
-                     <HBox.margin>
-                        <Insets left="10.0" />
-                     </HBox.margin>
-                  </Button>
-               </children>
-            </HBox>
-            <HBox alignment="CENTER" layoutX="10.0" layoutY="72.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="4">
-               <children>
-                  <Label text="Trabajador:">
-                     <font>
-                        <Font size="17.0" />
-                     </font>
-                     <HBox.margin>
-                        <Insets right="50.0" />
-                     </HBox.margin>
-                  </Label>
-                  <TextField>
-                     <padding>
-                        <Insets bottom="5.0" left="40.0" right="40.0" top="5.0" />
-                     </padding>
-                  </TextField>
-                  <Button mnemonicParsing="false" text="...">
-                     <padding>
-                        <Insets bottom="5.0" left="20.0" right="20.0" top="5.0" />
-                     </padding>
-                     <HBox.margin>
-                        <Insets left="10.0" />
-                     </HBox.margin>
-                  </Button>
-               </children>
-            </HBox>
-            <HBox alignment="CENTER" layoutX="10.0" layoutY="72.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="5">
-               <children>
-                  <Label text="Tipo reserva:">
-                     <font>
-                        <Font size="17.0" />
-                     </font>
-                     <HBox.margin>
-                        <Insets right="90.0" />
-                     </HBox.margin>
-                  </Label>
-                  <ComboBox prefWidth="150.0">
-                     <HBox.margin>
-                        <Insets />
-                     </HBox.margin>
-                  </ComboBox>
-               </children>
-            </HBox>
-            <HBox alignment="CENTER" layoutX="10.0" layoutY="176.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="6">
-               <children>
-                  <Label text="Costo:">
-                     <font>
-                        <Font size="17.0" />
-                     </font>
-                     <HBox.margin>
-                        <Insets right="90.0" />
-                     </HBox.margin>
-                  </Label>
-                  <TextField />
-               </children>
-            </HBox>
-            <HBox alignment="CENTER" layoutX="10.0" layoutY="228.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="7">
-               <children>
-                  <Label text="Estado reserva:">
-                     <font>
-                        <Font size="17.0" />
-                     </font>
-                     <HBox.margin>
-                        <Insets right="90.0" />
-                     </HBox.margin>
-                  </Label>
-                  <ComboBox prefWidth="150.0">
-                     <HBox.margin>
-                        <Insets />
-                     </HBox.margin>
-                  </ComboBox>
-               </children>
-            </HBox>
-            <HBox alignment="CENTER" layoutX="10.0" layoutY="331.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="8">
-               <children>
-                  <Label text="Fecha entrada:">
-                     <font>
-                        <Font size="17.0" />
-                     </font>
-                     <HBox.margin>
-                        <Insets right="30.0" />
-                     </HBox.margin>
-                  </Label>
-                  <DatePicker />
-               </children>
-            </HBox>
-            <HBox alignment="CENTER" layoutX="10.0" layoutY="382.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="9">
-               <children>
-                  <Label text="Fecha salida:">
-                     <font>
-                        <Font size="17.0" />
-                     </font>
-                     <HBox.margin>
-                        <Insets right="30.0" />
-                     </HBox.margin>
-                  </Label>
-                  <DatePicker />
-               </children>
-            </HBox>
+            <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+            <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="3" />
+            <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+            <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="5" />
+            <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="6" />
+            <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="7" />
+            <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="8" />
+            <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="9" />
          </children>
       </GridPane>
-      <Button mnemonicParsing="false" text="Nueva reserva" GridPane.rowIndex="3" />
-      <Button mnemonicParsing="false" text="Salir" GridPane.columnIndex="1" GridPane.rowIndex="3" />
    </children>
    <padding>
       <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
