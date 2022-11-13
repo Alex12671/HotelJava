@@ -1,6 +1,7 @@
 package com.example.demo.domain;
 
 import com.example.demo.Hotel;
+import com.example.demo.infrastructure.DatabaseConnection;
 import com.example.demo.infrastructure.MySQLRepository;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -22,12 +23,21 @@ import javafx.util.Callback;
 
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.xml.transform.Result;
 import java.awt.*;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class Escena {
     private FXMLLoader fxmlLoader;
@@ -35,6 +45,23 @@ public class Escena {
 
     public Escena(MySQLRepository mySQLRepository) {
         this.mySQLRepository = mySQLRepository;
+    }
+
+    public Scene ConfirmationPage(Stage stage,String msg, Scene scene) throws IOException {
+
+        this.fxmlLoader = new FXMLLoader(Hotel.class.getResource("ConfirmationPage.fxml"));
+        Scene confirmationPage = new javafx.scene.Scene(fxmlLoader.load());
+
+        Label confirm = (Label) confirmationPage.lookup("#confirmar");
+        confirm.setText(msg);
+
+        Button volver = (Button) confirmationPage.lookup("#finalizar");
+        volver.setOnAction(event -> {
+            stage.setScene(scene);
+            stage.centerOnScreen();
+        });
+
+        return confirmationPage;
     }
 
     public Scene Error(Stage stage,String msg, Scene scene) throws IOException {
@@ -46,7 +73,12 @@ public class Escena {
         err.setText(msg);
 
         Button volver = (Button) Error.lookup("#volver");
-        volver.setOnAction(event -> stage.setScene(scene));
+        volver.setOnAction(event -> {
+            stage.setScene(scene);
+            stage.centerOnScreen();
+        });
+
+
 
         return Error;
     }
@@ -738,6 +770,7 @@ public class Escena {
         returnbtn.setOnAction(event -> {
             try {
                 stage.setScene(ReceptionistPanel(stage));
+                stage.centerOnScreen();
                 stage.setTitle("Panel recepcionista");
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -903,20 +936,200 @@ public class Escena {
     public Scene RoomReservation(Stage stage) throws IOException, SQLException {
         FXMLLoader fxmlLoad = new FXMLLoader(Hotel.class.getResource("RoomReservation.fxml"));
         Scene roomReservation = new javafx.scene.Scene(fxmlLoad.load());
+        stage.setTitle("Reserva de habitaciones");
         TableView showReservations = reservationTable(stage,roomReservation);
         GridPane reservationGrid = (GridPane) roomReservation.lookup("#reservationGrid");
-        reservationGrid.setVisible(false);
         HBox tableContainer = (HBox) roomReservation.lookup("#tableContainer");
+        HBox tableHbox = (HBox) roomReservation.lookup("#tableHbox");
         reservationGrid.setStyle("-fx-background-color: #6366f1;");
         tableContainer.setStyle("-fx-background-color: #156F70;");
-        showReservations.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
-                reservationGrid.setVisible(true);
+        tableHbox.setStyle("-fx-background-color: #156F70;");
+
+        Button returnbtn = (Button) roomReservation.lookup("#returnBtn");
+        Button newReservation = (Button) roomReservation.lookup("#newReservation");
+        Button makePayment = (Button) roomReservation.lookup("#makePayment");
+        Button cancelReservation = (Button) roomReservation.lookup("#cancelReservation");
+        Button checkIn = (Button) roomReservation.lookup("#checkIn");
+        Button checkOut = (Button) roomReservation.lookup("#checkOut");
+        Button search = (Button) roomReservation.lookup(("#search"));
+
+        search.setOnAction(event -> {
+
+        });
+
+        makePayment.setOnAction(event -> {
+            List selected = showReservations.getSelectionModel().getSelectedItems();
+            if(!selected.isEmpty()) {
+                selected = (List) selected.get(0);
+                try {
+                    if(selected.get(9).equals("Pagada")) {
+                        stage.setScene(Error(stage,"Esta reserva ya está pagada",RoomReservation(stage)));
+                        stage.centerOnScreen();
+                    }
+                    else if (selected.get(9).equals("Anulada")) {
+                        stage.setScene(Error(stage,"No se puede pagar una reserva anulada",RoomReservation(stage)));
+                        stage.centerOnScreen();
+                    }
+                    else {
+                        stage.setScene(PaymentConfirmation(stage, Integer.parseInt((String) selected.get(0))));
+                        stage.centerOnScreen();
+                    }
+
+                } catch (IOException | SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            else {
+                try {
+                    stage.setScene(Error(stage,"Por favor, seleccione una reserva",RoomReservation(stage)));
+                    stage.centerOnScreen();
+                } catch (IOException | SQLException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
+        checkIn.setOnAction(event -> {
+            List selected = showReservations.getSelectionModel().getSelectedItems();
+            if(!selected.isEmpty()) {
+                selected = (List) selected.get(0);
+                try {
+                    Date date = new Date();
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    String admitTime = formatter.format(date).split(" ")[1];
+                    String admitDate = formatter.format(date).split(" ")[0];
+                    int numReserva = (Integer.parseInt((String) selected.get(0)));
+                    ResultSet rs = this.mySQLRepository.GetReservationDates(numReserva);
+                    rs.next();
+                    if(rs.getString("Fecha_Ingreso").equals(admitDate)) {
+                        stage.setScene(CheckConfirmation(stage,"Quiere hacer el check-in de la reserva número " + numReserva + " ?",RoomReservation(stage),numReserva,admitTime,admitDate,"checkin"));
+                        stage.centerOnScreen();
+                    }
+                    else {
+                        stage.setScene(Error(stage,"Solo se puede hacer el check-in el mismo día del ingreso",RoomReservation(stage)));
+                        stage.centerOnScreen();
+                    }
 
 
+                } catch (SQLException | IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            else {
+                try {
+                    stage.setScene(Error(stage,"Por favor, seleccione una reserva",RoomReservation(stage)));
+                    stage.centerOnScreen();
+                } catch (IOException | SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+        });
+
+        checkOut.setOnAction(event -> {
+            List selected = showReservations.getSelectionModel().getSelectedItems();
+            if(!selected.isEmpty()) {
+                selected = (List) selected.get(0);
+                try {
+                    Date date = new Date();
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    String exittime = formatter.format(date).split(" ")[1];
+                    String today = formatter.format(date).split(" ")[0];
+                    today = today.trim();
+                    int numReserva = (Integer.parseInt((String) selected.get(0)));
+                    ResultSet rs = this.mySQLRepository.GetReservationDates(numReserva);
+                    rs.next();
+                    if(rs.getString("Estado").equals("Pendiente de pago")) {
+                        stage.setScene(Error(stage,"Por favor, realice el pago primero",RoomReservation(stage)));
+                        stage.centerOnScreen();
+                    }
+                    else {
+                        if(rs.getString("Fecha_Ingreso").compareTo(today) < 0 && rs.getString("Fecha_Salida").compareTo(today) > 0) {
+                            stage.setScene(CheckConfirmation(stage,"Quiere hacer el check-out de la reserva número " + numReserva + " ?",RoomReservation(stage),numReserva,exittime,today,"checkout"));
+                            stage.centerOnScreen();
+                        }
+                        else {
+                            stage.setScene(Error(stage,"Solo puede hacer el check-out dentro de la fecha de la reserva",RoomReservation(stage)));
+                            stage.centerOnScreen();
+                        }
+                    }
+
+
+
+                } catch (SQLException | IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            else {
+                try {
+                    stage.setScene(Error(stage,"Por favor, seleccione una reserva",RoomReservation(stage)));
+                    stage.centerOnScreen();
+                } catch (IOException | SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        cancelReservation.setOnAction(event -> {
+            List selected = showReservations.getSelectionModel().getSelectedItems();
+            if(!selected.isEmpty()) {
+                selected = (List) selected.get(0);
+                try {
+                    if(selected.get(9).equals("Anulada")) {
+                        stage.setScene(Error(stage,"Esta reserva ya está anulada",RoomReservation(stage)));
+                        stage.centerOnScreen();
+                    }
+                    else {
+                        stage.setScene(CancelReservation(stage, Integer.parseInt((String) selected.get(0))));
+                        stage.centerOnScreen();
+                    }
+
+                } catch (IOException | SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            else {
+                try {
+                    stage.setScene(Error(stage,"Por favor, seleccione una reserva",RoomReservation(stage)));
+                    stage.centerOnScreen();
+                } catch (IOException | SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        newReservation.setOnAction(event -> {
+            AddReservation(stage,roomReservation);
+        });
+        returnbtn.setOnAction(event -> {
+            try {
+                stage.setScene(ReceptionistPanel(stage));
+                stage.centerOnScreen();
+                stage.setTitle("Panel recepcionista");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        ComboBox cmbox = (ComboBox) roomReservation.lookup("#reserveType");
+        ComboBox chooseRoom = (ComboBox) roomReservation.lookup("#chooseRoom");
+        ComboBox chooseClient = (ComboBox) roomReservation.lookup("#chooseClient");
+        ComboBox chooseReceptionist = (ComboBox) roomReservation.lookup("#chooseReceptionist");
+
+        ResultSet rs = this.mySQLRepository.GetAllRooms();
+        while(rs.next()) {
+            chooseRoom.getItems().add(rs.getInt("Numero"));
+        }
+
+        ResultSet rs2 = this.mySQLRepository.GetAllClients();
+        while(rs2.next()) {
+            chooseClient.getItems().add(rs2.getString("DNI") + " - " + rs2.getString("Nom") + " " + rs2.getString("Cognoms"));
+        }
+
+        ResultSet rs3 = this.mySQLRepository.GetAllReceptionists();
+        while(rs3.next()) {
+            chooseReceptionist.getItems().add(rs3.getString("DNI") + " - " + rs3.getString("Nombre") + " " + rs3.getString("Apellidos"));
+        }
 
         return roomReservation;
     }
@@ -948,6 +1161,222 @@ public class Escena {
             System.out.println("Error on Building Data");
         }
         return reservationTable;
+    }
+
+    public Scene PaymentConfirmation(Stage stage, int numeroReserva ) throws IOException, SQLException {
+        this.fxmlLoader = new FXMLLoader(Hotel.class.getResource("PaymentConfirmation.fxml"));
+        Scene paymentConfirmation = new javafx.scene.Scene(fxmlLoader.load());
+
+        Label confirm = (Label) paymentConfirmation.lookup("#precio");
+        ResultSet rs = this.mySQLRepository.GetReservationPrice(numeroReserva);
+        rs.next();
+        int precio = rs.getInt("Costo");
+        confirm.setText("Desea realizar el pago por un precio de " + precio + "€ ?");
+
+        Button confirmar = (Button) paymentConfirmation.lookup("#pay");
+        Button volver = (Button) paymentConfirmation.lookup("#cancel");
+
+        confirmar.setOnAction(event -> {
+            try {
+                if(this.mySQLRepository.ChangePaymentStatus(numeroReserva) == 1) {
+                    stage.setScene(RoomReservation(stage));
+                    stage.centerOnScreen();
+                }
+                else {
+                    stage.setScene(Error(stage,"Hubo un error al ejecutar la consulta",RoomReservation(stage)));
+                }
+
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        });
+
+        volver.setOnAction(event -> {
+            try {
+                stage.setScene(RoomReservation(stage));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            stage.centerOnScreen();
+        });
+
+        return paymentConfirmation;
+    }
+
+    public Scene CancelReservation(Stage stage, int numeroReserva ) throws IOException, SQLException {
+        this.fxmlLoader = new FXMLLoader(Hotel.class.getResource("CancelReservation.fxml"));
+        Scene cancelReservation = new javafx.scene.Scene(fxmlLoader.load());
+
+        Label confirm = (Label) cancelReservation.lookup("#anularReserva");
+        confirm.setText("Desea anular la reserva con número " + numeroReserva + " ?");
+
+        Button confirmar = (Button) cancelReservation.lookup("#confirmBtn");
+        Button volver = (Button) cancelReservation.lookup("#cancel");
+
+        confirmar.setOnAction(event -> {
+            try {
+                if(this.mySQLRepository.CancelReservation(numeroReserva) == 1) {
+                    stage.setScene(RoomReservation(stage));
+                    stage.centerOnScreen();
+                }
+                else {
+                    stage.setScene(Error(stage,"Hubo un error al ejecutar la consulta",RoomReservation(stage)));
+                }
+
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        });
+
+        volver.setOnAction(event -> {
+            try {
+                stage.setScene(RoomReservation(stage));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            stage.centerOnScreen();
+        });
+
+        return cancelReservation;
+    }
+
+    public void AddReservation(Stage stage,Scene roomReservation) {
+        GridPane reservationGrid = (GridPane) roomReservation.lookup("#reservationGrid");
+        ArrayList values = new ArrayList<>();
+        for (Node node : reservationGrid.getChildren()) {
+            if (node instanceof HBox) {
+                for(Node node1: ((HBox) node).getChildren()) {
+                    if (node1 instanceof TextField) {
+                        TextField text = (TextField) roomReservation.lookup("#" + node1.getId());
+                        if(!text.getText().isEmpty()) {
+                            values.add(text.getText());
+                        }
+
+                    }
+                    else if (node1 instanceof ComboBox) {
+                        ComboBox comBox = (ComboBox) roomReservation.lookup("#" + node1.getId());
+                        if(comBox.getSelectionModel().getSelectedItem() != null) {
+                            values.add(comBox.getSelectionModel().getSelectedItem());
+                        }
+
+                    }
+                    else if (node1 instanceof DatePicker) {
+                        DatePicker date = (DatePicker) roomReservation.lookup("#" + node1.getId());
+                        if(date.getValue() != null) {
+                            LocalDate datepicker = date.getValue();
+                            values.add(datepicker);
+                        }
+
+                    }
+
+                }
+            }
+        }
+        try {
+            if(values.size() == 6) {
+                ResultSet rs = this.mySQLRepository.CheckDates(values);
+                rs.next();
+                if(rs.getInt("Match") != 0) {
+                    stage.setScene(Error(stage,"La habitación está ocupada en la fecha seleccionada",RoomReservation(stage)));
+                    stage.centerOnScreen();
+                }
+                else {
+                    LocalDate admitDate = (LocalDate) values.get(4);
+                    LocalDate exitDate = (LocalDate) values.get(5);
+                    long diff = ChronoUnit.DAYS.between(admitDate,exitDate);
+                    if(diff < 0) {
+                        stage.setScene(Error(stage,"La fecha de entrada no puede ser posterior a la fecha de salida",RoomReservation(stage)));
+                        stage.centerOnScreen();
+                    }
+                    else {
+                        int numeroNoches = (int) diff;
+                        String idCliente = (String) values.get(1);
+                        idCliente.trim();
+                        idCliente = idCliente.split("-")[0];
+                        String idRecepcionista = (String) values.get(2);
+                        idRecepcionista.trim();
+                        idRecepcionista = idRecepcionista.split("-")[0];
+                        int numero = (Integer) values.get(0);
+                        ResultSet rs2 = this.mySQLRepository.GetPrice(numero);
+                        rs2.next();
+                        int precio = rs2.getInt("Precio") * numeroNoches;
+                        if(this.mySQLRepository.NewReservation(values,idCliente,idRecepcionista,precio) == 1) {
+                            stage.setScene(RoomReservation(stage));
+                            stage.centerOnScreen();
+                        }
+
+                    }
+
+                }
+
+
+            }
+            else {
+                stage.setScene(Error(stage,"No pueden haber campos vacíos.",RoomReservation(stage)));
+            }
+
+        } catch (SQLException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Scene CheckConfirmation(Stage stage,String msg, Scene scene, int numeroReserva,String actualTime,String exitDate,String function) throws IOException {
+
+        this.fxmlLoader = new FXMLLoader(Hotel.class.getResource("CheckConfirmation.fxml"));
+        Scene checkConfirmation = new javafx.scene.Scene(fxmlLoader.load());
+
+        Label confirm = (Label) checkConfirmation.lookup("#confirmar");
+        confirm.setText(msg);
+
+        Button confirmar = (Button) checkConfirmation.lookup("#checkIn");
+
+        confirmar.setOnAction(event -> {
+            try {
+                if(function.equals("checkin")) {
+                    if(this.mySQLRepository.CheckIn(numeroReserva,actualTime) == 1) {
+                        stage.setScene(RoomReservation(stage));
+                        stage.centerOnScreen();
+                    }
+                    else {
+                        stage.setScene(Error(stage,"Hubo un error al ejecutar la consulta",RoomReservation(stage)));
+                    }
+                }
+                else {
+                    if(this.mySQLRepository.CheckOut(numeroReserva,actualTime,exitDate) == 1) {
+                        stage.setScene(RoomReservation(stage));
+                        stage.centerOnScreen();
+                    }
+                    else {
+                        stage.setScene(Error(stage,"Hubo un error al ejecutar la consulta",RoomReservation(stage)));
+                    }
+                }
+
+
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+
+        Button volver = (Button) checkConfirmation.lookup("#cancel");
+        volver.setOnAction(event -> {
+            stage.setScene(scene);
+            stage.centerOnScreen();
+        });
+
+        return checkConfirmation;
     }
 
 }

@@ -25,7 +25,7 @@ public class Hotel extends Application {
     public void start(Stage stage) throws SQLException, IOException {
         Connection connection = DatabaseConnection.connect();
         Statement s = connection.createStatement( ResultSet.TYPE_SCROLL_INSENSITIVE,
-                ResultSet.CONCUR_UPDATABLE);
+            ResultSet.CONCUR_UPDATABLE);
         this.mySQLRepository = new MySQLRepository(s);
         this.scene = new Escena(mySQLRepository);
 

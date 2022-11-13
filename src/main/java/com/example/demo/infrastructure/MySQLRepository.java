@@ -1,5 +1,6 @@
 package com.example.demo.infrastructure;
 
+import javax.xml.transform.Result;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -9,6 +10,14 @@ public class MySQLRepository {
     private Statement statement;
 
     public MySQLRepository(Statement statement) {
+        this.statement = statement;
+    }
+
+    public Statement getStatement() {
+        return statement;
+    }
+
+    public void setStatement(Statement statement) {
         this.statement = statement;
     }
 
@@ -48,6 +57,10 @@ public class MySQLRepository {
         return this.statement.executeQuery("SELECT * FROM clientes WHERE Activado = 1");
     }
 
+    public ResultSet GetAllReceptionists() throws SQLException {
+        return this.statement.executeQuery("SELECT * FROM recepcionistas WHERE Validado = 1");
+    }
+
     public int AddClient(String estat_civil, String ocupacio, String nom, String cognoms, String dni, String nacionalitat, Integer telefon, String email) throws SQLException {
         return this.statement.executeUpdate("INSERT INTO clientes VALUES ('" + dni + "','" + nom +
                 "','" + cognoms + "','" + nacionalitat + "','" + telefon + "','" + email + "','" + ocupacio + "','" + estat_civil + "',1)");
@@ -81,4 +94,43 @@ public class MySQLRepository {
     public ResultSet GetAllReservations() throws SQLException {
         return this.statement.executeQuery("SELECT * FROM reservas");
     }
+
+    public int NewReservation(ArrayList array, String idCliente, String idRecepcionista, int precio) throws SQLException {
+        return this.statement.executeUpdate("INSERT INTO reservas VALUES (DEFAULT,'" + idCliente + "','" + idRecepcionista +
+                "','" + array.get(0) + "','" + array.get(4) + "','Pendiente','" + array.get(5) + "','Pendiente','" + precio + "','" + array.get(3) + "')");
+
+    }
+
+    public ResultSet CheckDates(ArrayList array) throws SQLException {
+        return this.statement.executeQuery("SELECT COUNT(*) AS 'Match' FROM reservas WHERE ((Fecha_Ingreso BETWEEN '" + array.get(4) + "' AND '" + array.get(5) + "' OR Fecha_Salida BETWEEN '" + array.get(4) + "' AND '" + array.get(5) + "') OR (Fecha_Ingreso < '" + array.get(4) + "' AND Fecha_Salida > '" + array.get(5) + "')) AND Numero = '" + array.get(0) + "' ");
+    }
+
+    public ResultSet GetPrice(int numero) throws SQLException {
+        return this.statement.executeQuery("SELECT Precio FROM habitaciones WHERE Numero = '" + numero + "'");
+    }
+
+    public ResultSet GetReservationPrice(int numero) throws SQLException {
+        return this.statement.executeQuery("SELECT Costo FROM reservas WHERE IdReserva = '" + numero + "'");
+    }
+
+    public int ChangePaymentStatus(int numero) throws SQLException {
+        return this.statement.executeUpdate("UPDATE reservas SET Estado = 'Pagada' WHERE IdReserva = '" + numero + "'");
+    }
+
+    public int CancelReservation(int numero) throws SQLException {
+        return this.statement.executeUpdate("UPDATE reservas SET Estado = 'Anulada' WHERE IdReserva = '" + numero + "'");
+    }
+
+    public ResultSet GetReservationDates(int numero) throws SQLException {
+        return this.statement.executeQuery("SELECT Fecha_Ingreso,Fecha_Salida,Estado,Hora_Ingreso FROM reservas WHERE IdReserva = '" + numero + "'");
+    }
+
+    public int CheckIn(int numero, String admitTime) throws SQLException {
+        return this.statement.executeUpdate("UPDATE reservas SET Hora_Ingreso = '" + admitTime + "' WHERE IdReserva = '" + numero + "'");
+    }
+
+    public int CheckOut(int numero, String exitTime, String exitDate) throws SQLException {
+        return this.statement.executeUpdate("UPDATE reservas SET Hora_Salida = '" + exitTime + "',Fecha_Salida = '" + exitDate + "' WHERE IdReserva = '" + numero + "'");
+    }
+
 }
