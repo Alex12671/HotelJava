@@ -93,12 +93,12 @@
                   <Insets left="10.0" />
                </padding>
             </Label>
-            <TextField>
+            <TextField fx:id="searchField">
                <HBox.margin>
                   <Insets right="40.0" />
                </HBox.margin>
             </TextField>
-            <Button mnemonicParsing="false" text="Buscar" />
+            <Button fx:id="search" mnemonicParsing="false" text="Buscar" />
          </children>
       </HBox>
       <GridPane fx:id="reservationGrid" GridPane.rowIndex="2">

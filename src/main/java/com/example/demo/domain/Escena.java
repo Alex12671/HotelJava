@@ -207,19 +207,28 @@ public class Escena {
                 String DNI = ((TextField) registro.lookup("#dni")).getText();
                 String nacionalitat = ((TextField) registro.lookup("#nacionalitat")).getText();
                 String telefon = ((TextField) registro.lookup("#telefon")).getText();
-                try {
-                    Scene confirmRegister = ConfirmRegister(stage);
-                    Integer tlf = Integer.parseInt(telefon);
-                    String email = ((TextField) registro.lookup("#email")).getText();
-                    Recepcionista r1 = new Recepcionista(usuario, password, nom, cognoms, DNI, nacionalitat, tlf, email);
-                    int rows = this.mySQLRepository.RegisterRecepcionist(r1.getUsuario(), r1.getPassword(), r1.getNom(),
-                            r1.getCognoms(), r1.getDNI(), r1.getNacionalitat(), r1.getTelefon(), r1.getEmail());
-                    stage.setScene(confirmRegister);
-
-                } catch (NumberFormatException e) {
-                    Scene error = Error(stage,"El campo teléfono solo puede contener números",RegisterPage(stage));
-                    stage.setScene(error);
+                String email = ((TextField) registro.lookup("#email")).getText();
+                if(!DNI.matches("^[0-9]{8}[A-Z]$")) {
+                    stage.setScene(Error(stage,"El DNI no se ajusta al formato solicitado",RegisterPage(stage)));
                 }
+                else if(!email.matches("^.{1,}[@].{1,}[.].{1,4}$")) {
+                    stage.setScene(Error(stage,"El email no se ajusta al formato solicitado",RegisterPage(stage)));
+                }
+                else if(!telefon.matches("^[0-9]{8,12}$")) {
+                    stage.setScene(Error(stage,"El teléfono no se ajusta al formato solicitado",RegisterPage(stage)));
+                }
+                else {
+                    Recepcionista r1 = new Recepcionista(usuario, password, nom, cognoms, DNI, nacionalitat, Integer.parseInt(telefon), email);
+                    if(this.mySQLRepository.RegisterRecepcionist(r1.getUsuario(), r1.getPassword(), r1.getNom(),
+                            r1.getCognoms(), r1.getDNI(), r1.getNacionalitat(), r1.getTelefon(), r1.getEmail()) == 1) {
+                        stage.setScene(ConfirmationPage(stage,"El usuario ha sido registrado correctamente",LoginPage(stage)));
+                    }
+                    else {
+                        stage.setScene(Error(stage,"Hubo un error al ejecutar la consulta",RegisterPage(stage)));
+                    }
+                }
+
+
             } catch (SQLException | IOException e) {
                 throw new RuntimeException(e);
             }
@@ -809,31 +818,27 @@ public class Escena {
                 String DNI = ((TextField) AddClient.lookup("#dni")).getText();
                 String nacionalitat = ((TextField) AddClient.lookup("#nacionalitat")).getText();
                 String telefon = ((TextField) AddClient.lookup("#telefon")).getText();
-                try {
-                    Integer tlf = Integer.parseInt(telefon);
-                    String email = ((TextField) AddClient.lookup("#email")).getText();
-                    Cliente c1 = new Cliente(estatCivil, ocupacio, nom, cognoms, DNI, nacionalitat, tlf, email);
-                    int rows = this.mySQLRepository.AddClient(c1.getEstat_civil(), c1.getOcupacio(), c1.getNom(),
-                            c1.getCognoms(), c1.getDNI(), c1.getNacionalitat(), c1.getTelefon(), c1.getEmail());
-
-                    Scene confirmar = ConfirmRegister(stage);
-                    stage.setScene(confirmar);
-                    Label confirmacion = (Label) confirmar.lookup("#confirmar");
-                    confirmacion.setText("Cliente añadido correctamente");
-                    Button finalizar = (Button) confirmar.lookup("#finalizar");
-                    finalizar.setOnAction(event2 -> {
-                        try {
-                            stage.setScene(ClientsManagement(stage));
-                        } catch (IOException | SQLException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-                } catch (NumberFormatException e) {
-                    Scene error = Error(stage,"El campo teléfono solo puede contener números",AddClient(stage));
-                    stage.setScene(error);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                String email = ((TextField) AddClient.lookup("#email")).getText();
+                if(!DNI.matches("^[0-9]{8}[A-Z]$")) {
+                    stage.setScene(Error(stage,"El DNI no se ajusta al formato solicitado",AddClient(stage)));
                 }
+                else if(!email.matches("^.{1,}[@].{1,}[.].{1,4}$")) {
+                    stage.setScene(Error(stage,"El email no se ajusta al formato solicitado",AddClient(stage)));
+                }
+                else if(!telefon.matches("^[0-9]{8,12}$")) {
+                    stage.setScene(Error(stage,"El teléfono no se ajusta al formato solicitado",AddClient(stage)));
+                }
+                else {
+                    Cliente c1 = new Cliente(estatCivil, ocupacio, nom, cognoms, DNI, nacionalitat, Integer.parseInt(telefon), email);
+                    if(this.mySQLRepository.AddClient(c1.getEstat_civil(), c1.getOcupacio(), c1.getNom(),
+                            c1.getCognoms(), c1.getDNI(), c1.getNacionalitat(), c1.getTelefon(), c1.getEmail()) == 1) {
+                        stage.setScene(ConfirmationPage(stage,"El cliente ha sido registrado correctamente",LoginPage(stage)));
+                    }
+                    else {
+                        stage.setScene(Error(stage,"Hubo un error al ejecutar la consulta",RegisterPage(stage)));
+                    }
+                }
+
             } catch (SQLException | IOException e) {
                 throw new RuntimeException(e);
             }
