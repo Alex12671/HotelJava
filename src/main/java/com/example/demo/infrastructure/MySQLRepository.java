@@ -71,7 +71,7 @@ public class MySQLRepository {
     }
 
     public int EditClient(ArrayList array,String DNI) throws SQLException {
-        return this.statement.executeUpdate("UPDATE clientes SET DNI = '" + array.get(0) + "', Nom = '" + array.get(1) + "', Cognoms = '" + array.get(2) + "', Nacionalitat = '" + array.get(3) + "', Telefon = '" + array.get(4) + "', Email = '" + array.get(5) + "', Ocupacio = '" + array.get(6) + "', Estat_Civil = '" + array.get(7) + "' WHERE DNI = " + DNI + "");
+        return this.statement.executeUpdate("UPDATE clientes SET DNI = '" + array.get(0) + "', Nom = '" + array.get(1) + "', Cognoms = '" + array.get(2) + "', Nacionalitat = '" + array.get(3) + "', Telefon = '" + array.get(4) + "', Email = '" + array.get(5) + "', Ocupacio = '" + array.get(6) + "', Estat_Civil = '" + array.get(7) + "' WHERE DNI LIKE '" + DNI + "'");
     }
 
     public ResultSet GetAllRooms() throws SQLException {

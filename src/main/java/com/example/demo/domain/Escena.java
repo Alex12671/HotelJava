@@ -246,21 +246,6 @@ public class Escena {
         return registro;
     }
 
-    public Scene ConfirmRegister(Stage stage) throws IOException {
-        FXMLLoader fxmlLoad = new FXMLLoader(Hotel.class.getResource("ConfirmarRegistro.fxml"));
-        Scene confirmRegister = new javafx.scene.Scene(fxmlLoad.load());
-
-        Button finalizar = (Button) confirmRegister.lookup("#finalizar");
-        finalizar.setOnAction(event -> {
-            try {
-                stage.setScene(LoginPage(stage));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        return confirmRegister;
-    }
     public Scene AdministratorPanel(Stage stage) throws IOException, SQLException {
         FXMLLoader fxmlLoader = new FXMLLoader(Hotel.class.getResource("PanelAdmin.fxml"));
         Scene panelAdmin = new javafx.scene.Scene(fxmlLoader.load());
@@ -293,6 +278,7 @@ public class Escena {
             Scene validar = null;
             try {
                 validar = ValidateReceptionists(stage);
+                stage.centerOnScreen();
             } catch (IOException | SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -832,7 +818,7 @@ public class Escena {
                     Cliente c1 = new Cliente(estatCivil, ocupacio, nom, cognoms, DNI, nacionalitat, Integer.parseInt(telefon), email);
                     if(this.mySQLRepository.AddClient(c1.getEstat_civil(), c1.getOcupacio(), c1.getNom(),
                             c1.getCognoms(), c1.getDNI(), c1.getNacionalitat(), c1.getTelefon(), c1.getEmail()) == 1) {
-                        stage.setScene(ConfirmationPage(stage,"El cliente ha sido registrado correctamente",LoginPage(stage)));
+                        stage.setScene(ConfirmationPage(stage,"El cliente ha sido registrado correctamente",ClientsManagement(stage)));
                     }
                     else {
                         stage.setScene(Error(stage,"Hubo un error al ejecutar la consulta",RegisterPage(stage)));
