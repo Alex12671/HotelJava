@@ -29,7 +29,7 @@ public class MySQLRepository {
     }
 
     public int GetReceptionistCredentials(String usuario, String password) throws SQLException {
-        ResultSet rs = this.statement.executeQuery("SELECT COUNT(*) AS 'rows' FROM recepcionistas WHERE Usuario = '" + usuario + "' AND Password = '" + password + "' AND Validado = 1");
+        ResultSet rs = this.statement.executeQuery("SELECT COUNT(*) AS 'rows' FROM recepcionistas WHERE DNI = '" + usuario + "' AND Password = '" + password + "' AND Validado = 1");
         rs.next();
         int rows = rs.getInt("rows");
         return rows;
@@ -71,7 +71,7 @@ public class MySQLRepository {
     }
 
     public int EditClient(ArrayList array,String DNI) throws SQLException {
-        return this.statement.executeUpdate("UPDATE clientes SET DNI = '" + array.get(0) + "', Nom = '" + array.get(1) + "', Cognoms = '" + array.get(2) + "', Nacionalitat = '" + array.get(3) + "', Telefon = '" + array.get(4) + "', Email = '" + array.get(5) + "', Ocupacio = '" + array.get(6) + "', Estat_Civil = '" + array.get(7) + "' WHERE DNI LIKE '" + DNI + "'");
+        return this.statement.executeUpdate("UPDATE clientes SET DNI = '" + array.get(0) + "', Nom = '" + array.get(1) + "', Cognoms = '" + array.get(2) + "', Nacionalitat = '" + array.get(3) + "', Telefon = '" + array.get(4) + "', Email = '" + array.get(5) + "', Ocupacio = '" + array.get(6) + "', Estat_Civil = '" + array.get(7) + "' WHERE DNI = " + DNI + "");
     }
 
     public ResultSet GetAllRooms() throws SQLException {

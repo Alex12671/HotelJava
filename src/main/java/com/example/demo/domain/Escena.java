@@ -26,10 +26,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.xml.transform.Result;
 import java.awt.*;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
@@ -47,41 +44,6 @@ public class Escena {
         this.mySQLRepository = mySQLRepository;
     }
 
-    public Scene ConfirmationPage(Stage stage,String msg, Scene scene) throws IOException {
-
-        this.fxmlLoader = new FXMLLoader(Hotel.class.getResource("ConfirmationPage.fxml"));
-        Scene confirmationPage = new javafx.scene.Scene(fxmlLoader.load());
-
-        Label confirm = (Label) confirmationPage.lookup("#confirmar");
-        confirm.setText(msg);
-
-        Button volver = (Button) confirmationPage.lookup("#finalizar");
-        volver.setOnAction(event -> {
-            stage.setScene(scene);
-            stage.centerOnScreen();
-        });
-
-        return confirmationPage;
-    }
-
-    public Scene Error(Stage stage,String msg, Scene scene) throws IOException {
-
-        this.fxmlLoader = new FXMLLoader(Hotel.class.getResource("Error.fxml"));
-        Scene Error = new javafx.scene.Scene(fxmlLoader.load());
-
-        Label err = (Label) Error.lookup("#error");
-        err.setText(msg);
-
-        Button volver = (Button) Error.lookup("#volver");
-        volver.setOnAction(event -> {
-            stage.setScene(scene);
-            stage.centerOnScreen();
-        });
-
-
-
-        return Error;
-    }
     public Scene AdminLogin(Stage stage) throws IOException {
 
         FXMLLoader fxmlLoader = new FXMLLoader(Hotel.class.getResource("Login.fxml"));
@@ -90,6 +52,7 @@ public class Escena {
         Button Loginbtn = (Button) AdminLogin.lookup("#loginbtn");
         Button regresar = (Button) AdminLogin.lookup("#regresar");
         Button exit = (Button) AdminLogin.lookup("#exitbtn");
+        Alert alert = new Alert(Alert.AlertType.ERROR,"Las credenciales son incorrectas",ButtonType.OK);
 
         Loginbtn.setOnAction(event -> {
             String usuario = ((TextField) AdminLogin.lookup("#usuario")).getText();
@@ -101,8 +64,10 @@ public class Escena {
                     stage.centerOnScreen();
                 }
                 else {
-                    Scene Error = Error(stage,"Las credenciales son incorrectas",AdminLogin(stage));
-                    stage.setScene(Error);
+                    alert.showAndWait();
+                    if(alert.getResult() == ButtonType.OK) {
+                        alert.close();
+                    }
 
                 }
             } catch (SQLException | IOException ex) {
@@ -139,6 +104,7 @@ public class Escena {
         Button registrar = (Button) LoginPage.lookup("#registrarbtn");
         Button exit = (Button) LoginPage.lookup("#exitbtn");
         Button logAdmin = (Button) LoginPage.lookup("#loginAdmin");
+        Alert alert = new Alert(Alert.AlertType.ERROR,"Las credenciales son incorrectas",ButtonType.OK);
 
         logAdmin.setOnAction(event -> {
             try {
@@ -156,13 +122,15 @@ public class Escena {
             String password = ((PasswordField) LoginPage.lookup("#password")).getText();
             try {
                 if(this.mySQLRepository.GetReceptionistCredentials(usuario,password) == 1) {
-                    javafx.scene.Scene ReceptionistPanel = ReceptionistPanel(stage);
-                    stage.setScene(ReceptionistPanel);
+                    Sesión session = new Sesión(usuario);
+                    stage.setScene(ReceptionistPanel(stage));
                     stage.centerOnScreen();
                 }
                 else {
-                    Scene Error = Error(stage,"Las credenciales son incorrectas",LoginPage(stage));
-                    stage.setScene(Error);
+                    alert.showAndWait();
+                    if(alert.getResult() == ButtonType.OK) {
+                        alert.close();
+                    }
                 }
             } catch (SQLException | IOException ex) {
                 System.out.println("No se pudo ejecutar la consulta: ");
@@ -196,37 +164,64 @@ public class Escena {
 
         Button ReturnBtn = (Button) registro.lookup("#returnbtn");
         Button registerBtn = (Button) registro.lookup("#registerbtn");
-
-
+        Alert alert = new Alert(Alert.AlertType.WARNING,"Por favor, llene todos los campos",ButtonType.OK);
+        GridPane gridPane = (GridPane) registro.lookup("#gridPane");
         registerBtn.setOnAction(event -> {
             try {
-                String usuario = ((TextField) registro.lookup("#usuario")).getText();
-                String password = ((PasswordField) registro.lookup("#password")).getText();
-                String nom = ((TextField) registro.lookup("#nom")).getText();
-                String cognoms = ((TextField) registro.lookup("#cognoms")).getText();
-                String DNI = ((TextField) registro.lookup("#dni")).getText();
-                String nacionalitat = ((TextField) registro.lookup("#nacionalitat")).getText();
-                String telefon = ((TextField) registro.lookup("#telefon")).getText();
-                String email = ((TextField) registro.lookup("#email")).getText();
-                if(!DNI.matches("^[0-9]{8}[A-Z]$")) {
-                    stage.setScene(Error(stage,"El DNI no se ajusta al formato solicitado",RegisterPage(stage)));
+                ArrayList values = new ArrayList<>();
+                for (Node node : gridPane.getChildren()) {
+                    if (node instanceof HBox) {
+                        for(Node node1: ((HBox) node).getChildren()) {
+                            if (node1 instanceof TextField) {
+                                TextField text = (TextField) registro.lookup("#" + node1.getId());
+                                if(!text.getText().isEmpty()) {
+                                    values.add(text.getText());
+                                }
+                            }
+
+                        }
+                    }
                 }
-                else if(!email.matches("^.{1,}[@].{1,}[.].{1,4}$")) {
-                    stage.setScene(Error(stage,"El email no se ajusta al formato solicitado",RegisterPage(stage)));
-                }
-                else if(!telefon.matches("^[0-9]{8,12}$")) {
-                    stage.setScene(Error(stage,"El teléfono no se ajusta al formato solicitado",RegisterPage(stage)));
+                if(values.size() < 8) {
+                    alert.showAndWait();
+                    if(alert.getResult() == ButtonType.OK) {
+                        alert.close();
+                    }
                 }
                 else {
-                    Recepcionista r1 = new Recepcionista(usuario, password, nom, cognoms, DNI, nacionalitat, Integer.parseInt(telefon), email);
-                    if(this.mySQLRepository.RegisterRecepcionist(r1.getUsuario(), r1.getPassword(), r1.getNom(),
-                            r1.getCognoms(), r1.getDNI(), r1.getNacionalitat(), r1.getTelefon(), r1.getEmail()) == 1) {
-                        stage.setScene(ConfirmationPage(stage,"El usuario ha sido registrado correctamente",LoginPage(stage)));
+                    String email = (String) values.get(7);
+                    if (!email.matches("^.{1,}[@].{1,}[.].{1,4}$")) {
+                        alert.setContentText("El formato del email no es correcto");
+                        alert.showAndWait();
+                        if (alert.getResult() == ButtonType.OK) {
+                            alert.close();
+                        }
                     }
                     else {
-                        stage.setScene(Error(stage,"Hubo un error al ejecutar la consulta",RegisterPage(stage)));
+                        Recepcionista r1 = new Recepcionista((String) values.get(0), (String) values.get(1), (String) values.get(2), (String) values.get(3), (String) values.get(4), (String) values.get(5), Integer.parseInt((String) values.get(6)), (String) values.get(7));
+                        if(this.mySQLRepository.RegisterRecepcionist(r1.getUsuario(), r1.getPassword(), r1.getNom(),
+                                r1.getCognoms(), r1.getDNI(), r1.getNacionalitat(), r1.getTelefon(), r1.getEmail()) == 1) {
+                            alert.setAlertType(Alert.AlertType.INFORMATION);
+                            alert.setContentText("Recepcionista registrado correctamente");
+                            alert.showAndWait();
+                            if (alert.getResult() == ButtonType.OK) {
+                                alert.close();
+                                stage.setScene(LoginPage(stage));
+                                stage.centerOnScreen();
+                            }
+                        }
+                        else {
+                            alert.setAlertType(Alert.AlertType.ERROR);
+                            alert.setContentText("Hubo un error al realizar el registro");
+                            alert.showAndWait();
+                            if (alert.getResult() == ButtonType.OK) {
+                                alert.close();
+                            }
+                        }
                     }
                 }
+
+
 
 
             } catch (SQLException | IOException e) {
@@ -278,7 +273,6 @@ public class Escena {
             Scene validar = null;
             try {
                 validar = ValidateReceptionists(stage);
-                stage.centerOnScreen();
             } catch (IOException | SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -314,6 +308,8 @@ public class Escena {
         TableView tableview = (TableView) validarRec.lookup("#tabla");
         ObservableList<Object> data = FXCollections.observableArrayList();
         ResultSet rs = this.mySQLRepository.GetValidatedReceptionist();
+        Alert alert = new Alert(Alert.AlertType.WARNING,"Por favor, seleccione un recepcionista",ButtonType.CLOSE);
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION,"",ButtonType.OK,ButtonType.CLOSE);
         try {
             for (int i = 0; i < rs.getMetaData().getColumnCount() - 1; i++) {
                 final int j = i;
@@ -354,36 +350,44 @@ public class Escena {
 
             Button validar = (Button) validarRec.lookup("#validar");
             validar.setOnAction((ActionEvent event) -> {
-                TablePosition pos = (TablePosition) tableview.getSelectionModel().getSelectedCells().get(0);
-                int row = pos.getRow();
-                TableColumn col = (TableColumn) tableview.getColumns().get(0);
-                String id = (String) col.getCellObservableValue(tableview.getItems().get(row)).getValue();
-                try {
-                    if(this.mySQLRepository.ValidateRecepcionist(Integer.parseInt(id)) == 1) {
-                        tableview.getItems().removeAll(
-                                tableview.getSelectionModel().getSelectedItems());
+                if(tableview.getSelectionModel().getSelectedCells().isEmpty()) {
+                    alert.showAndWait();
+                    if (alert.getResult() == ButtonType.CLOSE) {
+                        alert.close();
                     }
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                }
+                else {
+                    TablePosition pos = (TablePosition) tableview.getSelectionModel().getSelectedCells().get(0);
+                    int row = pos.getRow();
+                    TableColumn col = (TableColumn) tableview.getColumns().get(0);
+                    String id = (String) col.getCellObservableValue(tableview.getItems().get(row)).getValue();
+                    confirmation.setContentText("Desea validar al recepcionista con id " + id + "?");
+                    confirmation.showAndWait();
+                    if (confirmation.getResult() == ButtonType.CLOSE) {
+                        confirmation.close();
+                    }
+                    else {
+                        try {
+
+                            if (this.mySQLRepository.ValidateRecepcionist(Integer.parseInt(id)) == 1) {
+                                alert.setAlertType(Alert.AlertType.INFORMATION);
+                                alert.setContentText("El recepcionista con Id " + id + " ha sido validado");
+                                alert.showAndWait();
+                                if (alert.getResult() == ButtonType.CLOSE) {
+                                    alert.close();
+                                }
+                                tableview.getItems().removeAll(
+                                        tableview.getSelectionModel().getSelectedItems());
+                            }
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+
                 }
             });
 
-            Button rechazar = (Button) validarRec.lookup("#rechazar");
-            rechazar.setOnAction((ActionEvent event) -> {
-                TablePosition pos = (TablePosition) tableview.getSelectionModel().getSelectedCells().get(0);
-                int row = pos.getRow();
-                TableColumn col = (TableColumn) tableview.getColumns().get(0);
-                String id = (String) col.getCellObservableValue(tableview.getItems().get(row)).getValue();
-                try {
-                    if(this.mySQLRepository.RejectReceptionist(Integer.parseInt(id)) == 1) {
-                        tableview.getItems().removeAll(
-                                tableview.getSelectionModel().getSelectedItems());
-                    }
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
 
-            });
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Error on Building Data");
@@ -394,7 +398,6 @@ public class Escena {
     public Scene ReceptionistPanel(Stage stage) throws IOException {
         FXMLLoader fxmlLoad = new FXMLLoader(Hotel.class.getResource("ReceptionistPanel.fxml"));
         Scene ReceptionistPanel = new javafx.scene.Scene(fxmlLoad.load());
-
         Button clientsManagement = (Button) ReceptionistPanel.lookup("#clientsManage");
         Button roomReservation = (Button) ReceptionistPanel.lookup("#roomReservation");
         Button logOut = (Button) ReceptionistPanel.lookup("#logOut");
@@ -444,8 +447,8 @@ public class Escena {
 
         Button addRoomBtn = (Button) roomManagement.lookup("#addRoom");
         Button returnbtn = (Button) roomManagement.lookup("#returnToPanel");
-        Button deleteRoomBtn = (Button) roomManagement.lookup("#deleteRoom");
         Button editRoomBtn = (Button) roomManagement.lookup("#editRoom");
+        Alert warning = new Alert(Alert.AlertType.WARNING,"Por favor, seleccione una habitación",ButtonType.CLOSE);
 
         editRoomBtn.setOnAction(event -> {
             List selected = showRooms.getSelectionModel().getSelectedItems();
@@ -458,38 +461,14 @@ public class Escena {
                 }
             }
             else {
-                try {
-                    stage.setScene(Error(stage,"Por favor, seleccione una habitación",RoomManagement(stage)));
-                } catch (IOException | SQLException e) {
-                    throw new RuntimeException(e);
+                warning.showAndWait();
+                if (warning.getResult() == ButtonType.CLOSE) {
+                    warning.close();
                 }
             }
 
         });
 
-        deleteRoomBtn.setOnAction(event -> {
-            if(showRooms.getSelectionModel().getSelectedCells().isEmpty()) {
-                try {
-                    stage.setScene(Error(stage,"Por favor, seleccione una habitación",RoomManagement(stage)));
-                } catch (IOException |SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            else {
-                TablePosition pos = (TablePosition) showRooms.getSelectionModel().getSelectedCells().get(0);
-                int row = pos.getRow();
-                TableColumn col = (TableColumn) showRooms.getColumns().get(0);
-                String numero = (String) col.getCellObservableValue(showRooms.getItems().get(row)).getValue();
-                try {
-                    if(this.mySQLRepository.DeleteRoom(numero) == 1) {
-                        showRooms.getItems().removeAll(showRooms.getSelectionModel().getSelectedItems());
-                    }
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-        });
         returnbtn.setOnAction(event -> {
             try {
                 stage.setScene(AdministratorPanel(stage));
@@ -502,7 +481,7 @@ public class Escena {
         addRoomBtn.setOnAction(event -> {
             try {
                 stage.setScene(AddRoom(stage));
-                stage.setTitle("Añadir cliente");
+                stage.setTitle("Añadir habitación");
             } catch (IOException | SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -547,6 +526,8 @@ public class Escena {
         Button returnBtn = (Button) addRoom.lookup("#returnBtn");
         Button addBtn = (Button) addRoom.lookup("#addBtn");
         GridPane gridPane = (GridPane) addRoom.lookup("#gridPane");
+        Alert warning = new Alert(Alert.AlertType.WARNING,"No pueden haber campos vacíos",ButtonType.CLOSE);
+
 
         addBtn.setOnAction(event -> {
             ArrayList values = new ArrayList<>();
@@ -578,7 +559,10 @@ public class Escena {
                     }
                 }
                 else {
-                    stage.setScene(Error(stage,"No pueden haber campos vacíos.",AddRoom(stage)));
+                    warning.showAndWait();
+                    if (warning.getResult() == ButtonType.CLOSE) {
+                        warning.close();
+                    }
                 }
 
             } catch (SQLException | IOException e) {
@@ -715,8 +699,8 @@ public class Escena {
 
         Button addClient = (Button) ClientsManagement.lookup("#addClient");
         Button returnbtn = (Button) ClientsManagement.lookup("#returnToPanel");
-        Button deleteClientBtn = (Button) ClientsManagement.lookup("#deleteClient");
         Button editClientBtn = (Button) ClientsManagement.lookup("#editClient");
+        Alert warning = new Alert(Alert.AlertType.WARNING,"Por favor, seleccione un cliente",ButtonType.CLOSE);
 
         editClientBtn.setOnAction(event -> {
             List selected = showClients.getSelectionModel().getSelectedItems();
@@ -729,39 +713,14 @@ public class Escena {
                 }
             }
             else {
-                try {
-                    stage.setScene(Error(stage,"Por favor, seleccione un cliente",ClientsManagement(stage)));
-                } catch (IOException | SQLException e) {
-                    throw new RuntimeException(e);
-                }
-                stage.setTitle("Editar cliente");
-            }
-
-        });
-
-        deleteClientBtn.setOnAction(event -> {
-            if(showClients.getSelectionModel().getSelectedCells().isEmpty()) {
-                try {
-                    stage.setScene(Error(stage,"Por favor, seleccione un cliente",ClientsManagement(stage)));
-                } catch (IOException |SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            else {
-                TablePosition pos = (TablePosition) showClients.getSelectionModel().getSelectedCells().get(0);
-                int row = pos.getRow();
-                TableColumn col = (TableColumn) showClients.getColumns().get(0);
-                String dni = (String) col.getCellObservableValue(showClients.getItems().get(row)).getValue();
-                try {
-                    if(this.mySQLRepository.DeleteClient(dni) == 1) {
-                        showClients.getItems().removeAll(showClients.getSelectionModel().getSelectedItems());
+                    warning.showAndWait();
+                    if (warning.getResult() == ButtonType.CLOSE) {
+                        warning.close();
                     }
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
             }
 
         });
+
         returnbtn.setOnAction(event -> {
             try {
                 stage.setScene(ReceptionistPanel(stage));
@@ -792,39 +751,67 @@ public class Escena {
 
         Button returnBtn = (Button) AddClient.lookup("#returnBtn");
         Button registerBtn = (Button) AddClient.lookup("#addBtn");
-
+        GridPane gridPane = (GridPane) AddClient.lookup("#gridPane");
+        Alert warning = new Alert(Alert.AlertType.WARNING,"No pueden haber campos vacíos",ButtonType.CLOSE);
+        Alert confirm = new Alert(Alert.AlertType.INFORMATION,"Cliente registrado correctamente",ButtonType.OK);
 
         registerBtn.setOnAction(event -> {
             try {
-                ChoiceBox estatCivilBox = (ChoiceBox) AddClient.lookup("#estatCivil");
-                String estatCivil = (String) estatCivilBox.getSelectionModel().getSelectedItem();
-                String ocupacio = ((TextField) AddClient.lookup("#ocupacio")).getText();
-                String nom = ((TextField) AddClient.lookup("#nom")).getText();
-                String cognoms = ((TextField) AddClient.lookup("#cognoms")).getText();
-                String DNI = ((TextField) AddClient.lookup("#dni")).getText();
-                String nacionalitat = ((TextField) AddClient.lookup("#nacionalitat")).getText();
-                String telefon = ((TextField) AddClient.lookup("#telefon")).getText();
-                String email = ((TextField) AddClient.lookup("#email")).getText();
-                if(!DNI.matches("^[0-9]{8}[A-Z]$")) {
-                    stage.setScene(Error(stage,"El DNI no se ajusta al formato solicitado",AddClient(stage)));
+                ArrayList values = new ArrayList<>();
+                for (Node node : gridPane.getChildren()) {
+                    if (node instanceof HBox) {
+                        for(Node node1: ((HBox) node).getChildren()) {
+                            if (node1 instanceof TextField) {
+                                TextField text = (TextField) AddClient.lookup("#" + node1.getId());
+                                if(!text.getText().isEmpty()) {
+                                    values.add(text.getText());
+                                }
+                            }
+                            else if (node1 instanceof ComboBox) {
+                                ComboBox estatCivil = (ComboBox) AddClient.lookup("#" + node1.getId());
+                                if(estatCivil.getSelectionModel().getSelectedItem() != null) {
+                                    values.add(estatCivil.getSelectionModel().getSelectedItem());
+                                }
+                            }
+
+                        }
+                    }
                 }
-                else if(!email.matches("^.{1,}[@].{1,}[.].{1,4}$")) {
-                    stage.setScene(Error(stage,"El email no se ajusta al formato solicitado",AddClient(stage)));
-                }
-                else if(!telefon.matches("^[0-9]{8,12}$")) {
-                    stage.setScene(Error(stage,"El teléfono no se ajusta al formato solicitado",AddClient(stage)));
+                if(values.size() < 8) {
+                    warning.showAndWait();
+                    if(warning.getResult() == ButtonType.CLOSE) {
+                        warning.close();
+                    }
                 }
                 else {
-                    Cliente c1 = new Cliente(estatCivil, ocupacio, nom, cognoms, DNI, nacionalitat, Integer.parseInt(telefon), email);
-                    if(this.mySQLRepository.AddClient(c1.getEstat_civil(), c1.getOcupacio(), c1.getNom(),
-                            c1.getCognoms(), c1.getDNI(), c1.getNacionalitat(), c1.getTelefon(), c1.getEmail()) == 1) {
-                        stage.setScene(ConfirmationPage(stage,"El cliente ha sido registrado correctamente",ClientsManagement(stage)));
-                    }
-                    else {
-                        stage.setScene(Error(stage,"Hubo un error al ejecutar la consulta",RegisterPage(stage)));
+                    String email = (String) values.get(6);
+                    if (!email.matches("^.{1,}[@].{1,}[.].{1,4}$")) {
+                        warning.setContentText("El formato del email no es correcto");
+                        warning.showAndWait();
+                        if (warning.getResult() == ButtonType.OK) {
+                            warning.close();
+                        }
+                    } else {
+                        Cliente c1 = new Cliente((String) values.get(7), (String) values.get(4), (String) values.get(1), (String) values.get(2), (String) values.get(0), (String) values.get(3), Integer.parseInt((String) values.get(5)), (String) values.get(6));
+                        if (this.mySQLRepository.AddClient(c1.getEstat_civil(), c1.getOcupacio(), c1.getNom(),
+                                c1.getCognoms(), c1.getDNI(), c1.getNacionalitat(), c1.getTelefon(), c1.getEmail()) == 1) {
+                            confirm.showAndWait();
+                            if (confirm.getResult() == ButtonType.OK) {
+                                stage.setScene(ClientsManagement(stage));
+                                stage.centerOnScreen();
+                                confirm.close();
+
+                            }
+                        } else {
+                            warning.setAlertType(Alert.AlertType.ERROR);
+                            warning.setContentText("Error al ejecutar la consulta");
+                            warning.showAndWait();
+                            if (warning.getResult() == ButtonType.OK) {
+                                warning.close();
+                            }
+                        }
                     }
                 }
-
             } catch (SQLException | IOException e) {
                 throw new RuntimeException(e);
             }
@@ -905,7 +892,13 @@ public class Escena {
             try {
                 System.out.println(dni);
                 this.mySQLRepository.EditClient(values,dni);
-                stage.setScene(ClientsManagement(stage));
+                Alert confirm = new Alert(Alert.AlertType.INFORMATION,"Cliente editado correctamente",ButtonType.OK);
+                confirm.showAndWait();
+                if (confirm.getResult() == ButtonType.OK) {
+                    stage.setScene(ClientsManagement(stage));
+                    stage.centerOnScreen();
+                    confirm.close();
+                }
             } catch (SQLException | IOException e) {
                 throw new RuntimeException(e);
             }
@@ -935,6 +928,8 @@ public class Escena {
         reservationGrid.setStyle("-fx-background-color: #6366f1;");
         tableContainer.setStyle("-fx-background-color: #156F70;");
         tableHbox.setStyle("-fx-background-color: #156F70;");
+        Alert error = new Alert(Alert.AlertType.ERROR,"Esta reserva ya está pagada",ButtonType.OK);
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,"Desea pagar esta reserva?",ButtonType.YES,ButtonType.NO);
 
         Button returnbtn = (Button) roomReservation.lookup("#returnBtn");
         Button newReservation = (Button) roomReservation.lookup("#newReservation");
@@ -952,31 +947,57 @@ public class Escena {
             List selected = showReservations.getSelectionModel().getSelectedItems();
             if(!selected.isEmpty()) {
                 selected = (List) selected.get(0);
-                try {
                     if(selected.get(9).equals("Pagada")) {
-                        stage.setScene(Error(stage,"Esta reserva ya está pagada",RoomReservation(stage)));
-                        stage.centerOnScreen();
+                        error.setAlertType(Alert.AlertType.ERROR);
+                        error.setContentText("Esta reserva ya está pagada");
+                        error.showAndWait();
+                        if (error.getResult() == ButtonType.OK) {
+                            error.close();
+                        }
                     }
                     else if (selected.get(9).equals("Anulada")) {
-                        stage.setScene(Error(stage,"No se puede pagar una reserva anulada",RoomReservation(stage)));
-                        stage.centerOnScreen();
+                        error.setAlertType(Alert.AlertType.ERROR);
+                        error.setContentText("No se puede pagar una reserva anulada");
+                        error.showAndWait();
+                        if (error.getResult() == ButtonType.OK) {
+                            error.close();
+                        }
                     }
                     else {
-                        stage.setScene(PaymentConfirmation(stage, Integer.parseInt((String) selected.get(0))));
-                        stage.centerOnScreen();
+                        confirm.setContentText("Desea pagar la reserva por un costo de " + selected.get(8) + "€ ?");
+                        confirm.showAndWait();
+                        if (confirm.getResult() == ButtonType.YES) {
+                            try {
+                                if(this.mySQLRepository.ChangePaymentStatus(Integer.parseInt((String)selected.get(0))) == 1) {
+                                    stage.setScene(RoomReservation(stage));
+                                    stage.centerOnScreen();
+                                }
+                                else {
+                                    error.setAlertType(Alert.AlertType.ERROR);
+                                    error.setContentText("Hubo un error al ejecutar la consulta");
+                                    error.showAndWait();
+                                    if (error.getResult() == ButtonType.OK) {
+                                        error.close();
+                                    }
+                                }
+                            } catch (SQLException e) {
+                                throw new RuntimeException(e);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        else {
+                            confirm.close();
+                        }
                     }
-
-                } catch (IOException | SQLException e) {
-                    throw new RuntimeException(e);
-                }
             }
             else {
-                try {
-                    stage.setScene(Error(stage,"Por favor, seleccione una reserva",RoomReservation(stage)));
-                    stage.centerOnScreen();
-                } catch (IOException | SQLException e) {
-                    throw new RuntimeException(e);
-                }
+                    error.setAlertType(Alert.AlertType.WARNING);
+                    error.setContentText("Por favor, seleccione una reserva");
+                    error.showAndWait();
+                    if (error.getResult() == ButtonType.OK) {
+                        error.close();
+                    }
             }
         });
 
@@ -993,12 +1014,30 @@ public class Escena {
                     ResultSet rs = this.mySQLRepository.GetReservationDates(numReserva);
                     rs.next();
                     if(rs.getString("Fecha_Ingreso").equals(admitDate)) {
-                        stage.setScene(CheckConfirmation(stage,"Quiere hacer el check-in de la reserva número " + numReserva + " ?",RoomReservation(stage),numReserva,admitTime,admitDate,"checkin"));
-                        stage.centerOnScreen();
+                        confirm.setContentText("Quiere hacer el check-in de la reserva número " + numReserva + " ?");
+                        confirm.showAndWait();
+                        if (confirm.getResult() == ButtonType.YES) {
+                            if(this.mySQLRepository.CheckIn(numReserva,admitTime) == 1) {
+                                stage.setScene(RoomReservation(stage));
+                                stage.centerOnScreen();
+                            }
+                            else {
+                                error.setAlertType(Alert.AlertType.ERROR);
+                                error.setContentText("Hubo un error al ejecutar la consulta");
+                                error.showAndWait();
+                                if (error.getResult() == ButtonType.OK) {
+                                    error.close();
+                                }
+                            }
+                        }
                     }
                     else {
-                        stage.setScene(Error(stage,"Solo se puede hacer el check-in el mismo día del ingreso",RoomReservation(stage)));
-                        stage.centerOnScreen();
+                        error.setAlertType(Alert.AlertType.ERROR);
+                        error.setContentText("Solo se puede hacer el check-in el mismo día del ingreso");
+                        error.showAndWait();
+                        if (error.getResult() == ButtonType.OK) {
+                            error.close();
+                        }
                     }
 
 
@@ -1007,12 +1046,12 @@ public class Escena {
                 }
             }
             else {
-                try {
-                    stage.setScene(Error(stage,"Por favor, seleccione una reserva",RoomReservation(stage)));
-                    stage.centerOnScreen();
-                } catch (IOException | SQLException e) {
-                    throw new RuntimeException(e);
-                }
+                    error.setAlertType(Alert.AlertType.WARNING);
+                    error.setContentText("Por favor, seleccione una reserva");
+                    error.showAndWait();
+                    if (error.getResult() == ButtonType.OK) {
+                        error.close();
+                    }
             }
 
         });
@@ -1031,17 +1070,39 @@ public class Escena {
                     ResultSet rs = this.mySQLRepository.GetReservationDates(numReserva);
                     rs.next();
                     if(rs.getString("Estado").equals("Pendiente de pago")) {
-                        stage.setScene(Error(stage,"Por favor, realice el pago primero",RoomReservation(stage)));
-                        stage.centerOnScreen();
+                        error.setAlertType(Alert.AlertType.WARNING);
+                        error.setContentText("Por favor, realice el pago primero");
+                        error.showAndWait();
+                        if (error.getResult() == ButtonType.OK) {
+                            error.close();
+                        }
                     }
                     else {
                         if(rs.getString("Fecha_Ingreso").compareTo(today) < 0 && rs.getString("Fecha_Salida").compareTo(today) > 0) {
-                            stage.setScene(CheckConfirmation(stage,"Quiere hacer el check-out de la reserva número " + numReserva + " ?",RoomReservation(stage),numReserva,exittime,today,"checkout"));
-                            stage.centerOnScreen();
+                            confirm.setContentText("Quiere hacer el check-out de la reserva número " + numReserva + " ?");
+                            confirm.showAndWait();
+                            if (confirm.getResult() == ButtonType.YES) {
+                                if(this.mySQLRepository.CheckOut(numReserva,exittime,today) == 1) {
+                                    stage.setScene(RoomReservation(stage));
+                                    stage.centerOnScreen();
+                                }
+                                else {
+                                    error.setAlertType(Alert.AlertType.ERROR);
+                                    error.setContentText("Hubo un error al ejecutar la consulta");
+                                    error.showAndWait();
+                                    if (error.getResult() == ButtonType.OK) {
+                                        error.close();
+                                    }
+                                }
+                            }
                         }
                         else {
-                            stage.setScene(Error(stage,"Solo puede hacer el check-out dentro de la fecha de la reserva",RoomReservation(stage)));
-                            stage.centerOnScreen();
+                            error.setAlertType(Alert.AlertType.ERROR);
+                            error.setContentText("Solo puede hacer el check-out dentro de la fecha de la reserva");
+                            error.showAndWait();
+                            if (error.getResult() == ButtonType.OK) {
+                                error.close();
+                            }
                         }
                     }
 
@@ -1052,12 +1113,12 @@ public class Escena {
                 }
             }
             else {
-                try {
-                    stage.setScene(Error(stage,"Por favor, seleccione una reserva",RoomReservation(stage)));
-                    stage.centerOnScreen();
-                } catch (IOException | SQLException e) {
-                    throw new RuntimeException(e);
-                }
+                    error.setAlertType(Alert.AlertType.WARNING);
+                    error.setContentText("Por favor, seleccione una reserva");
+                    error.showAndWait();
+                    if (error.getResult() == ButtonType.OK) {
+                        error.close();
+                    }
             }
         });
 
@@ -1067,12 +1128,26 @@ public class Escena {
                 selected = (List) selected.get(0);
                 try {
                     if(selected.get(9).equals("Anulada")) {
-                        stage.setScene(Error(stage,"Esta reserva ya está anulada",RoomReservation(stage)));
-                        stage.centerOnScreen();
+                        error.setAlertType(Alert.AlertType.ERROR);
+                        error.setContentText("Esta reserva ya está anulada");
+                        error.showAndWait();
+                        if (error.getResult() == ButtonType.OK) {
+                            error.close();
+                        }
                     }
                     else {
-                        stage.setScene(CancelReservation(stage, Integer.parseInt((String) selected.get(0))));
-                        stage.centerOnScreen();
+                        if(this.mySQLRepository.CancelReservation(Integer.parseInt((String) selected.get(0))) == 1) {
+                            stage.setScene(RoomReservation(stage));
+                            stage.centerOnScreen();
+                        }
+                        else {
+                            error.setAlertType(Alert.AlertType.ERROR);
+                            error.setContentText("Hubo un error al ejecutar la consulta");
+                            error.showAndWait();
+                            if (error.getResult() == ButtonType.OK) {
+                                error.close();
+                            }
+                        }
                     }
 
                 } catch (IOException | SQLException e) {
@@ -1080,12 +1155,12 @@ public class Escena {
                 }
             }
             else {
-                try {
-                    stage.setScene(Error(stage,"Por favor, seleccione una reserva",RoomReservation(stage)));
-                    stage.centerOnScreen();
-                } catch (IOException | SQLException e) {
-                    throw new RuntimeException(e);
-                }
+                    error.setAlertType(Alert.AlertType.WARNING);
+                    error.setContentText("Por favor, seleccione una reserva");
+                    error.showAndWait();
+                    if (error.getResult() == ButtonType.OK) {
+                        error.close();
+                    }
             }
         });
 
@@ -1154,95 +1229,9 @@ public class Escena {
         return reservationTable;
     }
 
-    public Scene PaymentConfirmation(Stage stage, int numeroReserva ) throws IOException, SQLException {
-        this.fxmlLoader = new FXMLLoader(Hotel.class.getResource("PaymentConfirmation.fxml"));
-        Scene paymentConfirmation = new javafx.scene.Scene(fxmlLoader.load());
-
-        Label confirm = (Label) paymentConfirmation.lookup("#precio");
-        ResultSet rs = this.mySQLRepository.GetReservationPrice(numeroReserva);
-        rs.next();
-        int precio = rs.getInt("Costo");
-        confirm.setText("Desea realizar el pago por un precio de " + precio + "€ ?");
-
-        Button confirmar = (Button) paymentConfirmation.lookup("#pay");
-        Button volver = (Button) paymentConfirmation.lookup("#cancel");
-
-        confirmar.setOnAction(event -> {
-            try {
-                if(this.mySQLRepository.ChangePaymentStatus(numeroReserva) == 1) {
-                    stage.setScene(RoomReservation(stage));
-                    stage.centerOnScreen();
-                }
-                else {
-                    stage.setScene(Error(stage,"Hubo un error al ejecutar la consulta",RoomReservation(stage)));
-                }
-
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-        });
-
-        volver.setOnAction(event -> {
-            try {
-                stage.setScene(RoomReservation(stage));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-            stage.centerOnScreen();
-        });
-
-        return paymentConfirmation;
-    }
-
-    public Scene CancelReservation(Stage stage, int numeroReserva ) throws IOException, SQLException {
-        this.fxmlLoader = new FXMLLoader(Hotel.class.getResource("CancelReservation.fxml"));
-        Scene cancelReservation = new javafx.scene.Scene(fxmlLoader.load());
-
-        Label confirm = (Label) cancelReservation.lookup("#anularReserva");
-        confirm.setText("Desea anular la reserva con número " + numeroReserva + " ?");
-
-        Button confirmar = (Button) cancelReservation.lookup("#confirmBtn");
-        Button volver = (Button) cancelReservation.lookup("#cancel");
-
-        confirmar.setOnAction(event -> {
-            try {
-                if(this.mySQLRepository.CancelReservation(numeroReserva) == 1) {
-                    stage.setScene(RoomReservation(stage));
-                    stage.centerOnScreen();
-                }
-                else {
-                    stage.setScene(Error(stage,"Hubo un error al ejecutar la consulta",RoomReservation(stage)));
-                }
-
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-        });
-
-        volver.setOnAction(event -> {
-            try {
-                stage.setScene(RoomReservation(stage));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-            stage.centerOnScreen();
-        });
-
-        return cancelReservation;
-    }
-
     public void AddReservation(Stage stage,Scene roomReservation) {
         GridPane reservationGrid = (GridPane) roomReservation.lookup("#reservationGrid");
+        Alert error = new Alert(Alert.AlertType.ERROR,"La habitación está ocupada en la fecha seleccionada",ButtonType.OK);
         ArrayList values = new ArrayList<>();
         for (Node node : reservationGrid.getChildren()) {
             if (node instanceof HBox) {
@@ -1274,34 +1263,38 @@ public class Escena {
             }
         }
         try {
-            if(values.size() == 6) {
+            if(values.size() == 5) {
                 ResultSet rs = this.mySQLRepository.CheckDates(values);
                 rs.next();
                 if(rs.getInt("Match") != 0) {
-                    stage.setScene(Error(stage,"La habitación está ocupada en la fecha seleccionada",RoomReservation(stage)));
-                    stage.centerOnScreen();
+                    error.setAlertType(Alert.AlertType.ERROR);
+                    error.showAndWait();
+                    if (error.getResult() == ButtonType.OK) {
+                        error.close();
+                    }
                 }
                 else {
                     LocalDate admitDate = (LocalDate) values.get(4);
                     LocalDate exitDate = (LocalDate) values.get(5);
                     long diff = ChronoUnit.DAYS.between(admitDate,exitDate);
                     if(diff < 0) {
-                        stage.setScene(Error(stage,"La fecha de entrada no puede ser posterior a la fecha de salida",RoomReservation(stage)));
-                        stage.centerOnScreen();
+                        error.setAlertType(Alert.AlertType.ERROR);
+                        error.setContentText("La fecha de entrada no puede ser posterior a la fecha de salida");
+                        error.showAndWait();
+                        if (error.getResult() == ButtonType.OK) {
+                            error.close();
+                        }
                     }
                     else {
                         int numeroNoches = (int) diff;
                         String idCliente = (String) values.get(1);
                         idCliente.trim();
                         idCliente = idCliente.split("-")[0];
-                        String idRecepcionista = (String) values.get(2);
-                        idRecepcionista.trim();
-                        idRecepcionista = idRecepcionista.split("-")[0];
                         int numero = (Integer) values.get(0);
                         ResultSet rs2 = this.mySQLRepository.GetPrice(numero);
                         rs2.next();
                         int precio = rs2.getInt("Precio") * numeroNoches;
-                        if(this.mySQLRepository.NewReservation(values,idCliente,idRecepcionista,precio) == 1) {
+                        if(this.mySQLRepository.NewReservation(values,idCliente,Sesión.username,precio) == 1) {
                             stage.setScene(RoomReservation(stage));
                             stage.centerOnScreen();
                         }
@@ -1313,61 +1306,17 @@ public class Escena {
 
             }
             else {
-                stage.setScene(Error(stage,"No pueden haber campos vacíos.",RoomReservation(stage)));
+                error.setAlertType(Alert.AlertType.WARNING);
+                error.setContentText("No pueden haber campos vacíos");
+                error.showAndWait();
+                if (error.getResult() == ButtonType.OK) {
+                    error.close();
+                }
             }
 
         } catch (SQLException | IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public Scene CheckConfirmation(Stage stage,String msg, Scene scene, int numeroReserva,String actualTime,String exitDate,String function) throws IOException {
-
-        this.fxmlLoader = new FXMLLoader(Hotel.class.getResource("CheckConfirmation.fxml"));
-        Scene checkConfirmation = new javafx.scene.Scene(fxmlLoader.load());
-
-        Label confirm = (Label) checkConfirmation.lookup("#confirmar");
-        confirm.setText(msg);
-
-        Button confirmar = (Button) checkConfirmation.lookup("#checkIn");
-
-        confirmar.setOnAction(event -> {
-            try {
-                if(function.equals("checkin")) {
-                    if(this.mySQLRepository.CheckIn(numeroReserva,actualTime) == 1) {
-                        stage.setScene(RoomReservation(stage));
-                        stage.centerOnScreen();
-                    }
-                    else {
-                        stage.setScene(Error(stage,"Hubo un error al ejecutar la consulta",RoomReservation(stage)));
-                    }
-                }
-                else {
-                    if(this.mySQLRepository.CheckOut(numeroReserva,actualTime,exitDate) == 1) {
-                        stage.setScene(RoomReservation(stage));
-                        stage.centerOnScreen();
-                    }
-                    else {
-                        stage.setScene(Error(stage,"Hubo un error al ejecutar la consulta",RoomReservation(stage)));
-                    }
-                }
-
-
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-
-        Button volver = (Button) checkConfirmation.lookup("#cancel");
-        volver.setOnAction(event -> {
-            stage.setScene(scene);
-            stage.centerOnScreen();
-        });
-
-        return checkConfirmation;
     }
 
 }

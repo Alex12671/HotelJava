@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 18-11-2022 a las 08:40:00
+-- Tiempo de generación: 17-11-2022 a las 07:09:37
 -- Versión del servidor: 10.4.24-MariaDB
 -- Versión de PHP: 8.1.6
 
@@ -64,9 +64,8 @@ CREATE TABLE `clientes` (
 --
 
 INSERT INTO `clientes` (`DNI`, `Nom`, `Cognoms`, `Nacionalitat`, `Telefon`, `Email`, `Ocupacio`, `Estat_Civil`, `Activado`) VALUES
-('54928153A', 'cliente', '3', 'Español', 635120485, 'cliente3@mail.es', 'Albañil', 'Soltero/a', 1),
-('58496527L', 'cliente', '2', 'Portugués', 654319826, 'cliente2@mail.es', 'Doctor', 'Divorciado/a', 1),
-('84320619R', 'cliente', '1', 'Alemán', 624197302, 'cliente1@mail.es', 'Ingeniero informático', 'Casado/a', 1);
+('54928153A', 'cliente', '3', 'Español', 635120485, 'cliente3@mail.es', 'Albañil', 'Separado/a', 1),
+('58496527L', 'r', 'j', 'sc', 25, 'polñ', 'p', 'Divorciado/a', 1);
 
 -- --------------------------------------------------------
 
@@ -93,7 +92,6 @@ CREATE TABLE `habitaciones` (
 
 INSERT INTO `habitaciones` (`Numero`, `Planta`, `Precio`, `Estado`, `Tipo`, `Numero_Camas`, `Superficie`, `Wifi`, `Minibar`, `Activado`) VALUES
 (1, 2, 18, 'Disponible', 'Doble', 1, '20', 'Si', 'No', 1),
-(2, 1, 16, 'Disponible', 'Individual', 1, '15', 'Si', 'No', 1),
 (7, 2, 25, 'Disponible', 'Familiar', 3, '35', 'Si', 'Si', 1);
 
 -- --------------------------------------------------------
@@ -120,10 +118,9 @@ CREATE TABLE `recepcionistas` (
 --
 
 INSERT INTO `recepcionistas` (`Id`, `Usuario`, `Password`, `Nombre`, `Apellidos`, `DNI`, `Nacionalidad`, `Teléfono`, `Email`, `Validado`) VALUES
-(1, 'recep1', '1', 'recep', '1', '28436915M', 'Francés', 634182649, 'recep1@mail.es', 1),
+(1, 'a', 'b', 'c', 'd', 'e', 'f', 7878, 'h', 1),
 (2, 'recep2', '1', 'recep', '2', '12345678B', 'ESP', 123456798, 'recep2@mail.es', 1),
-(5, 'recep3', '1', 'recep', '3', '42019678M', 'Español', 624985134, 'recep3@mail.es', 1),
-(6, 'recep4', '1', 'recep', '4', '18054934P', 'Belga', 624198736, 'recep4@mail.es', 0);
+(5, 'recep3', '1', 'recep', '3', '42019678M', 'Español', 624985134, 'recep3@mail.es', 1);
 
 -- --------------------------------------------------------
 
@@ -149,8 +146,9 @@ CREATE TABLE `reservas` (
 --
 
 INSERT INTO `reservas` (`IdReserva`, `IdCliente`, `IdRecepcionista`, `Numero`, `Fecha_Ingreso`, `Hora_Ingreso`, `Fecha_Salida`, `Hora_Salida`, `Costo`, `Estado`) VALUES
-(8, '54928153A', '28436915M', 1, '2022-11-18', 'Pendiente', '2022-11-25', 'Pendiente', 126, 'Pendiente de pago'),
-(9, '58496527L', '28436915M', 2, '2022-11-10', '12:35:27', '2022-11-19', 'Pendiente', 144, 'Pagada');
+(1, '54928153A', '12345678B', 1, '2022-11-13', '20:32:40', '2022-11-18', 'Pendiente', 25, 'Anulada'),
+(5, '58496527L', '12345678B', 1, '2022-11-19', 'Pendiente', '2022-11-25', 'Pendiente', 108, 'Pagada'),
+(7, '54928153A', '42019678M', 7, '2022-11-10', 'Pendiente', '2022-11-13', '21:27:12', 200, 'Pagada');
 
 --
 -- Índices para tablas volcadas
@@ -189,13 +187,13 @@ ALTER TABLE `reservas`
 -- AUTO_INCREMENT de la tabla `recepcionistas`
 --
 ALTER TABLE `recepcionistas`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `reservas`
 --
 ALTER TABLE `reservas`
-  MODIFY `IdReserva` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `IdReserva` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

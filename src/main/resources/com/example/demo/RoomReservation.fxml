@@ -111,8 +111,6 @@
             <RowConstraints minHeight="10.0" percentHeight="8.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -157,20 +155,7 @@
                   <ComboBox fx:id="chooseClient" prefWidth="150.0" />
                </children>
             </HBox>
-            <HBox alignment="CENTER" layoutX="10.0" layoutY="72.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="4">
-               <children>
-                  <Label text="Trabajador:">
-                     <font>
-                        <Font size="17.0" />
-                     </font>
-                     <HBox.margin>
-                        <Insets right="50.0" />
-                     </HBox.margin>
-                  </Label>
-                  <ComboBox fx:id="chooseReceptionist" prefWidth="150.0" />
-               </children>
-            </HBox>
-            <HBox alignment="CENTER" layoutX="10.0" layoutY="228.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="6">
+            <HBox alignment="CENTER" layoutX="10.0" layoutY="228.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="4">
                <children>
                   <Label text="Estado reserva:">
                      <font>
@@ -193,7 +178,7 @@
                   </ComboBox>
                </children>
             </HBox>
-            <HBox alignment="CENTER" layoutX="10.0" layoutY="331.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="7">
+            <HBox alignment="CENTER" layoutX="10.0" layoutY="331.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="5">
                <children>
                   <Label text="Fecha entrada:">
                      <font>
@@ -206,7 +191,7 @@
                   <DatePicker fx:id="checkInDate" />
                </children>
             </HBox>
-            <HBox alignment="CENTER" layoutX="10.0" layoutY="382.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="8">
+            <HBox alignment="CENTER" layoutX="10.0" layoutY="382.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="6">
                <children>
                   <Label text="Fecha salida:">
                      <font>
@@ -219,7 +204,7 @@
                   <DatePicker fx:id="checkOutDate" />
                </children>
             </HBox>
-            <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="9">
+            <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="7">
                <children>
                   <Button fx:id="newReservation" mnemonicParsing="false" text="Nueva reserva">
                      <HBox.margin>

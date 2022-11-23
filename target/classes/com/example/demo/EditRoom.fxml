@@ -103,6 +103,7 @@
                <items>
                   <FXCollections fx:factory="observableArrayList">
                      <String fx:value="Disponible" />
+                     <String fx:value="Ocupado" />
                      <String fx:value="En mantenimiento" />
                   </FXCollections>
                </items>
