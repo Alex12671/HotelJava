@@ -133,4 +133,8 @@ public class MySQLRepository {
         return this.statement.executeUpdate("UPDATE reservas SET Hora_Salida = '" + exitTime + "',Fecha_Salida = '" + exitDate + "' WHERE IdReserva = '" + numero + "'");
     }
 
+    public ResultSet GetClient(String dni) throws SQLException {
+        return this.statement.executeQuery("SELECT * FROM clientes WHERE DNI = '" + dni + "'");
+    }
+
 }

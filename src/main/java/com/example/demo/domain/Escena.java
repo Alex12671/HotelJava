@@ -1,7 +1,7 @@
 package com.example.demo.domain;
 
+import com.example.demo.Factura;
 import com.example.demo.Hotel;
-import com.example.demo.infrastructure.DatabaseConnection;
 import com.example.demo.infrastructure.MySQLRepository;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -13,28 +13,28 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.xml.transform.Result;
-import java.awt.*;
 import java.io.IOException;
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
 public class Escena {
     private FXMLLoader fxmlLoader;
@@ -938,6 +938,32 @@ public class Escena {
         Button checkIn = (Button) roomReservation.lookup("#checkIn");
         Button checkOut = (Button) roomReservation.lookup("#checkOut");
         Button search = (Button) roomReservation.lookup(("#search"));
+        Button generateInvoice = (Button) roomReservation.lookup("#generateInvoice");
+
+        generateInvoice.setOnAction(event -> {
+            List selected = showReservations.getSelectionModel().getSelectedItems();
+            if(!selected.isEmpty()) {
+                selected = (List) selected.get(0);
+                try {
+                    ResultSet rs = this.mySQLRepository.GetClient((String) selected.get(1));
+                    rs.next();
+                    String clientName = rs.getString("Nom") + " " + rs.getString("Cognoms");
+                    Factura f = new Factura("Factura de reserva nº " + selected.get(0),clientName,(String) selected.get(1));
+                    f.WriteInvoice();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+            else {
+                error.setAlertType(Alert.AlertType.WARNING);
+                error.setContentText("Por favor, seleccione una reserva");
+                error.showAndWait();
+                if (error.getResult() == ButtonType.OK) {
+                    error.close();
+                }
+            }
+        });
 
         search.setOnAction(event -> {
 
@@ -1180,7 +1206,6 @@ public class Escena {
         ComboBox cmbox = (ComboBox) roomReservation.lookup("#reserveType");
         ComboBox chooseRoom = (ComboBox) roomReservation.lookup("#chooseRoom");
         ComboBox chooseClient = (ComboBox) roomReservation.lookup("#chooseClient");
-        ComboBox chooseReceptionist = (ComboBox) roomReservation.lookup("#chooseReceptionist");
 
         ResultSet rs = this.mySQLRepository.GetAllRooms();
         while(rs.next()) {
@@ -1190,11 +1215,6 @@ public class Escena {
         ResultSet rs2 = this.mySQLRepository.GetAllClients();
         while(rs2.next()) {
             chooseClient.getItems().add(rs2.getString("DNI") + " - " + rs2.getString("Nom") + " " + rs2.getString("Cognoms"));
-        }
-
-        ResultSet rs3 = this.mySQLRepository.GetAllReceptionists();
-        while(rs3.next()) {
-            chooseReceptionist.getItems().add(rs3.getString("DNI") + " - " + rs3.getString("Nombre") + " " + rs3.getString("Apellidos"));
         }
 
         return roomReservation;
