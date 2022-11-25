@@ -7,17 +7,17 @@ import java.util.*;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 
 public class Factura {
     PDDocument invc;
-    int n;
     Integer total = 0;
-    Integer price;
     String CustName;
     String CustID;
     String ProductName = new String("Alojamiento");
-    Integer ProductPrice;
+    Float ProductPrice;
     Integer ProductQty = 1;
     String InvoiceTitle = new String("AlexHotels");
     String SubTitle;
@@ -30,28 +30,12 @@ public class Factura {
         this.invc = invc;
     }
 
-    public int getN() {
-        return n;
-    }
-
-    public void setN(int n) {
-        this.n = n;
-    }
-
     public Integer getTotal() {
         return total;
     }
 
     public void setTotal(Integer total) {
         this.total = total;
-    }
-
-    public Integer getPrice() {
-        return price;
-    }
-
-    public void setPrice(Integer price) {
-        this.price = price;
     }
 
     public String getCustName() {
@@ -78,11 +62,11 @@ public class Factura {
         ProductName = productName;
     }
 
-    public Integer getProductPrice() {
+    public Float getProductPrice() {
         return ProductPrice;
     }
 
-    public void setProductPrice(Integer productPrice) {
+    public void setProductPrice(Float productPrice) {
         ProductPrice = productPrice;
     }
 
@@ -110,14 +94,15 @@ public class Factura {
         SubTitle = subTitle;
     }
 
-    public Factura(String subTitle,String CustName, String CustID) {
+    public Factura(String subTitle,String CustName, String CustID,Float ProductPrice) {
         this.SubTitle = subTitle;
         this.CustName = CustName;
         this.CustID = CustID;
+        this.ProductPrice = ProductPrice;
         //Create Document
         invc = new PDDocument();
         //Create Blank Page
-        PDPage newpage = new PDPage();
+        PDPage newpage = new PDPage((new PDRectangle(PDRectangle.A5.getHeight(), PDRectangle.A5.getWidth())));
         //Add the blank page
         invc.addPage(newpage);
     }
@@ -129,18 +114,14 @@ public class Factura {
         try {
             //Prepare Content Stream
             PDPageContentStream cs = new PDPageContentStream(invc, mypage);
-
-            //Writing Single Line text
-            //Writing the Invoice title
-            cs.beginText();
-            cs.setFont(PDType1Font.TIMES_ROMAN, 20);
-            cs.newLineAtOffset(140, 750);
-            cs.showText(InvoiceTitle);
-            cs.endText();
+            PDImageXObject pdImage = PDImageXObject.createFromFile("img/logo.png", invc);
+            cs.drawImage(pdImage, 30, 290,100,100);
+            PDImageXObject pdImage2 = PDImageXObject.createFromFile("img/divisor2.png", invc);
+            cs.drawImage(pdImage2, 20, 143,550,40);
 
             cs.beginText();
             cs.setFont(PDType1Font.TIMES_ROMAN, 18);
-            cs.newLineAtOffset(270, 690);
+            cs.newLineAtOffset(270, 325 );
             cs.showText(SubTitle);
             cs.endText();
 
@@ -149,11 +130,11 @@ public class Factura {
             cs.beginText();
             cs.setFont(PDType1Font.TIMES_ROMAN, 14);
             cs.setLeading(20f);
-            cs.newLineAtOffset(60, 610);
+            cs.newLineAtOffset(40, 245);
             cs.showText("Nombre: ");
             cs.newLine();
             cs.showText("Nº identificación: ");
-            cs.newLineAtOffset(300,15);
+            cs.newLineAtOffset(300,0);
             SimpleDateFormat formateador = new SimpleDateFormat("dd 'de' MMMM 'de' yyyy", new Locale("es_ES"));
             Date fechaDate = new Date();
             String fecha = formateador.format(fechaDate);
@@ -163,7 +144,7 @@ public class Factura {
             cs.beginText();
             cs.setFont(PDType1Font.TIMES_ROMAN, 14);
             cs.setLeading(20f);
-            cs.newLineAtOffset(170, 610);
+            cs.newLineAtOffset(150, 245);
             cs.showText(CustName);
             cs.newLine();
             cs.showText(CustID);
@@ -171,80 +152,70 @@ public class Factura {
 
             cs.beginText();
             cs.setFont(PDType1Font.TIMES_ROMAN, 14);
-            cs.newLineAtOffset(80, 540);
-            cs.showText("Product Name");
+            cs.newLineAtOffset(80, 180);
+            cs.showText("Descripción");
             cs.endText();
 
             cs.beginText();
             cs.setFont(PDType1Font.TIMES_ROMAN, 14);
-            cs.newLineAtOffset(200, 540);
-            cs.showText("Unit Price");
+            cs.newLineAtOffset(200, 180);
+            cs.showText("Precio unitario");
             cs.endText();
 
             cs.beginText();
             cs.setFont(PDType1Font.TIMES_ROMAN, 14);
-            cs.newLineAtOffset(310, 540);
-            cs.showText("Quantity");
+            cs.newLineAtOffset(310, 180);
+            cs.showText("Cantidad");
             cs.endText();
 
             cs.beginText();
             cs.setFont(PDType1Font.TIMES_ROMAN, 14);
-            cs.newLineAtOffset(410, 540);
-            cs.showText("Price");
+            cs.newLineAtOffset(410, 180);
+            cs.showText("Total");
             cs.endText();
 
             cs.beginText();
             cs.setFont(PDType1Font.TIMES_ROMAN, 12);
             cs.setLeading(20f);
-            cs.newLineAtOffset(80, 520);
-            for(int i =0; i<n; i++) {
-                cs.showText(ProductName);
-                cs.newLine();
-            }
+            cs.newLineAtOffset(80, 135);
+            cs.showText(ProductName);
+            cs.newLine();
             cs.endText();
 
             cs.beginText();
             cs.setFont(PDType1Font.TIMES_ROMAN, 12);
             cs.setLeading(20f);
-            cs.newLineAtOffset(200, 520);
-            for(int i =0; i<n; i++) {
-                cs.showText(String.valueOf(ProductPrice));
-                cs.newLine();
-            }
+            cs.newLineAtOffset(225, 135);
+            cs.showText(String.valueOf(ProductPrice));
+            cs.newLine();
             cs.endText();
 
             cs.beginText();
             cs.setFont(PDType1Font.TIMES_ROMAN, 12);
             cs.setLeading(20f);
-            cs.newLineAtOffset(310, 520);
-            for(int i =0; i<n; i++) {
-                cs.showText(String.valueOf(ProductQty));
-                cs.newLine();
-            }
+            cs.newLineAtOffset(335, 135);
+            cs.showText(String.valueOf(ProductQty));
+            cs.newLine();
             cs.endText();
 
             cs.beginText();
             cs.setFont(PDType1Font.TIMES_ROMAN, 12);
             cs.setLeading(20f);
-            cs.newLineAtOffset(410, 520);
-            for(int i =0; i<n; i++) {
-                price = ProductPrice;
-                cs.showText(price.toString());
-                cs.newLine();
-            }
+            cs.newLineAtOffset(415, 135);
+            cs.showText(String.valueOf(ProductPrice));
+            cs.newLine();
             cs.endText();
 
             cs.beginText();
             cs.setFont(PDType1Font.TIMES_ROMAN, 14);
-            cs.newLineAtOffset(310, (500-(20*n)));
+            cs.newLineAtOffset(380, 50);
             cs.showText("Total: ");
             cs.endText();
 
             cs.beginText();
             cs.setFont(PDType1Font.TIMES_ROMAN, 14);
-            //Calculating where total is to be written using number of products
-            cs.newLineAtOffset(410, (500-(20*n)));
-            cs.showText(total.toString());
+            cs.newLineAtOffset(450, 50);
+            cs.showText(String.valueOf(ProductPrice));
             cs.endText();
 
             //Close the content stream

@@ -948,7 +948,7 @@ public class Escena {
                     ResultSet rs = this.mySQLRepository.GetClient((String) selected.get(1));
                     rs.next();
                     String clientName = rs.getString("Nom") + " " + rs.getString("Cognoms");
-                    Factura f = new Factura("Factura de reserva nº " + selected.get(0),clientName,(String) selected.get(1));
+                    Factura f = new Factura("Factura de reserva nº " + selected.get(0),clientName,(String) selected.get(1),Float.parseFloat((String) selected.get(8)));
                     f.WriteInvoice();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
