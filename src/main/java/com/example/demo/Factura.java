@@ -1,5 +1,6 @@
 package com.example.demo;
 
+import java.awt.*;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -134,7 +135,7 @@ public class Factura {
             cs.showText("Nombre: ");
             cs.newLine();
             cs.showText("Nº identificación: ");
-            cs.newLineAtOffset(300,0);
+            cs.newLineAtOffset(350,0);
             SimpleDateFormat formateador = new SimpleDateFormat("dd 'de' MMMM 'de' yyyy", new Locale("es_ES"));
             Date fechaDate = new Date();
             String fecha = formateador.format(fechaDate);
@@ -212,10 +213,13 @@ public class Factura {
             cs.showText("Total: ");
             cs.endText();
 
+            cs.addRect(375,45,120,1);
+            cs.setNonStrokingColor(Color.red);
+            cs.fill();
             cs.beginText();
             cs.setFont(PDType1Font.TIMES_ROMAN, 14);
             cs.newLineAtOffset(450, 50);
-            cs.showText(String.valueOf(ProductPrice));
+            cs.showText(String.valueOf(ProductPrice + "€"));
             cs.endText();
 
             //Close the content stream
