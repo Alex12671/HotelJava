@@ -221,7 +221,9 @@ public class Factura {
             //Close the content stream
             cs.close();
             //Save the PDF
-            invc.save("facturas/factura.pdf");
+            Date date = new Date();
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            invc.save("facturas/factura"+ CustID + formatter.format(date) + ".pdf");
 
         } catch (IOException e) {
             e.printStackTrace();
