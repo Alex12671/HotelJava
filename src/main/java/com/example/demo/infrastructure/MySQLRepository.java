@@ -95,14 +95,17 @@ public class MySQLRepository {
         return this.statement.executeQuery("SELECT * FROM reservas");
     }
 
+    public ResultSet GetSelectedReservation(String id) throws SQLException {
+        return this.statement.executeQuery("SELECT * FROM reservas WHERE IdReserva = '" + id + "'");
+    }
     public int NewReservation(ArrayList array, String idCliente, String idRecepcionista, int precio) throws SQLException {
         return this.statement.executeUpdate("INSERT INTO reservas VALUES (DEFAULT,'" + idCliente + "','" + idRecepcionista +
-                "','" + array.get(0) + "','" + array.get(4) + "','Pendiente','" + array.get(5) + "','Pendiente','" + precio + "','" + array.get(3) + "')");
+                "','" + array.get(0) + "','" + array.get(3) + "','Pendiente','" + array.get(4) + "','Pendiente','" + precio + "','" + array.get(2) + "')");
 
     }
 
     public ResultSet CheckDates(ArrayList array) throws SQLException {
-        return this.statement.executeQuery("SELECT COUNT(*) AS 'Match' FROM reservas WHERE ((Fecha_Ingreso BETWEEN '" + array.get(4) + "' AND '" + array.get(5) + "' OR Fecha_Salida BETWEEN '" + array.get(4) + "' AND '" + array.get(5) + "') OR (Fecha_Ingreso < '" + array.get(4) + "' AND Fecha_Salida > '" + array.get(5) + "')) AND Numero = '" + array.get(0) + "' ");
+        return this.statement.executeQuery("SELECT COUNT(*) AS 'Match' FROM reservas WHERE ((Fecha_Ingreso BETWEEN '" + array.get(3) + "' AND '" + array.get(4) + "' OR Fecha_Salida BETWEEN '" + array.get(3) + "' AND '" + array.get(4) + "') OR (Fecha_Ingreso < '" + array.get(3) + "' AND Fecha_Salida > '" + array.get(4) + "')) AND Numero = '" + array.get(0) + "' ");
     }
 
     public ResultSet GetPrice(int numero) throws SQLException {
