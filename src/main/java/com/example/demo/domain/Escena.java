@@ -35,6 +35,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.w3c.dom.Text;
 
 public class Escena {
     private FXMLLoader fxmlLoader;
@@ -453,6 +454,8 @@ public class Escena {
         Button returnbtn = (Button) roomManagement.lookup("#returnToPanel");
         Button editRoomBtn = (Button) roomManagement.lookup("#editRoom");
         Button searchRoom = (Button) roomManagement.lookup("#searchRoom");
+        ComboBox filterRoom = (ComboBox) roomManagement.lookup("#roomFilter");
+        filterRoom.getSelectionModel().selectFirst();
         Alert warning = new Alert(Alert.AlertType.WARNING,"Por favor, seleccione una habitación",ButtonType.CLOSE);
 
         editRoomBtn.setOnAction(event -> {
@@ -493,19 +496,136 @@ public class Escena {
         });
 
         searchRoom.setOnAction(event -> {
-            System.out.println("hola");
+            TextField searchText = (TextField) roomManagement.lookup("#searchField");
+            if(!searchText.getText().isEmpty()) {
+                String field = (String) filterRoom.getSelectionModel().getSelectedItem();
+                try {
+                    stage.setScene(RoomManagement(stage,field, searchText.getText()));
+                } catch (IOException | SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         });
 
         return roomManagement;
     }
 
-    public TableView roomTable(Stage stage, Scene ClientsManagement) throws SQLException {
-        TableView roomTable = (TableView) ClientsManagement.lookup("#clientsTable");
+    public Scene RoomManagement(Stage stage,String field,String text) throws IOException, SQLException {
+
+        FXMLLoader fxmlLoad = new FXMLLoader(Hotel.class.getResource("RoomManagement.fxml"));
+        Scene roomManagement = new Scene(fxmlLoad.load());
+
+        TableView showRooms = roomTable(stage,roomManagement,field,text);
+
+        Button addRoomBtn = (Button) roomManagement.lookup("#addRoom");
+        Button returnbtn = (Button) roomManagement.lookup("#returnToPanel");
+        Button editRoomBtn = (Button) roomManagement.lookup("#editRoom");
+        Button searchRoom = (Button) roomManagement.lookup("#searchRoom");
+        ComboBox filterRoom = (ComboBox) roomManagement.lookup("#roomFilter");
+        filterRoom.getSelectionModel().selectFirst();
+        Alert warning = new Alert(Alert.AlertType.WARNING,"Por favor, seleccione una habitación",ButtonType.CLOSE);
+
+        editRoomBtn.setOnAction(event -> {
+            List selected = showRooms.getSelectionModel().getSelectedItems();
+            if(!selected.isEmpty()) {
+                try {
+                    stage.setScene(EditRoom(stage, (List) selected.get(0)));
+                    stage.setTitle("Editar habitación");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            else {
+                warning.showAndWait();
+                if (warning.getResult() == ButtonType.CLOSE) {
+                    warning.close();
+                }
+            }
+
+        });
+
+        returnbtn.setOnAction(event -> {
+            try {
+                stage.setScene(AdministratorPanel(stage));
+                stage.setTitle("Panel administrador");
+            } catch (IOException | SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        addRoomBtn.setOnAction(event -> {
+            try {
+                stage.setScene(AddRoom(stage));
+                stage.setTitle("Añadir habitación");
+            } catch (IOException | SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        searchRoom.setOnAction(event -> {
+            TextField searchText = (TextField) roomManagement.lookup("#searchField");
+            if(!searchText.getText().isEmpty()) {
+                String roomField = (String) filterRoom.getSelectionModel().getSelectedItem();
+                try {
+                    stage.setScene(RoomManagement(stage, roomField, searchText.getText()));
+                    stage.centerOnScreen();
+                } catch (IOException | SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            else {
+                try {
+                    stage.setScene(RoomManagement(stage));
+                    stage.centerOnScreen();
+                } catch (IOException | SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        return roomManagement;
+    }
+
+    public TableView roomTable(Stage stage, Scene RoomManagement) throws SQLException {
+        TableView roomTable = (TableView) RoomManagement.lookup("#clientsTable");
+        ComboBox filterRoom = (ComboBox) RoomManagement.lookup("#roomFilter");
         ObservableList<Object> data = FXCollections.observableArrayList();
         ResultSet rs = this.mySQLRepository.GetAllRooms();
         try {
             for (int i = 0; i < rs.getMetaData().getColumnCount() - 1; i++) {
                 final int j = i;
+                filterRoom.getItems().add(rs.getMetaData().getColumnName(i + 1));
+                TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i + 1));
+                col.setStyle( "-fx-alignment: CENTER;");
+                col.setCellValueFactory((Callback<TableColumn.CellDataFeatures<ObservableList, String>, ObservableValue<String>>) param -> new SimpleStringProperty(param.getValue().get(j).toString()));
+                roomTable.getColumns().addAll(col);
+            }
+
+            while (rs.next()) {
+                ObservableList<String> row = FXCollections.observableArrayList();
+                for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
+                    row.add(rs.getString(i));
+                }
+                data.add(row);
+
+            }
+            roomTable.setItems(data);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error on Building Data");
+        }
+        return roomTable;
+    }
+
+    public TableView roomTable(Stage stage, Scene RoomManagement,String field,String searchText) throws SQLException {
+        TableView roomTable = (TableView) RoomManagement.lookup("#clientsTable");
+        ComboBox filterRoom = (ComboBox) RoomManagement.lookup("#roomFilter");
+        ObservableList<Object> data = FXCollections.observableArrayList();
+        ResultSet rs = this.mySQLRepository.GetSelectedRoom(field,searchText);
+        try {
+            for (int i = 0; i < rs.getMetaData().getColumnCount() - 1; i++) {
+                final int j = i;
+                filterRoom.getItems().add(rs.getMetaData().getColumnName(i + 1));
                 TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i + 1));
                 col.setStyle( "-fx-alignment: CENTER;");
                 col.setCellValueFactory((Callback<TableColumn.CellDataFeatures<ObservableList, String>, ObservableValue<String>>) param -> new SimpleStringProperty(param.getValue().get(j).toString()));
