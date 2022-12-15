@@ -78,8 +78,8 @@ public class MySQLRepository {
         return this.statement.executeQuery("SELECT * FROM habitaciones WHERE Activado = 1");
     }
 
-    public ResultSet GetSelectedRoom(String field,String searchText) throws SQLException {
-        return this.statement.executeQuery("SELECT * FROM habitaciones WHERE Activado = 1 AND " + field + " = '" + searchText + "' ");
+    public ResultSet GetSelectedRoom(String sql) throws SQLException {
+        return this.statement.executeQuery(sql);
     }
 
     public int DeleteRoom(String numero) throws SQLException {
